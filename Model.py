@@ -92,7 +92,7 @@ class TrafficModel(mesa.Model):
 
     def add_vehicles(self):
         for i in range(self.vehicles):
-            a = Vehicle(i, self)
+            a = Vehicle(i, None, self)
             self.schedule.add(a)
 
     def step(self):
