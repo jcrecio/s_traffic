@@ -2,18 +2,11 @@ import uuid
 import mesa
 import random
 import numpy as np
+from Directions import DOWN, LEFT, OBSTACLE, RIGHT, UP
 from Obstacle import Obstacle
 from Semaphore import Semaphore
 from Townhall import Townhall
-
 from Vehicle import Vehicle
-
-OBSTACLE = -1
-UP = 0
-RIGHT = 1
-DOWN = 2
-LEFT = 3
-PROBABILITY_SLIP = 0.2
 
 class TrafficModel(mesa.Model):
     def __init__(self, rows, columns, duration, ratio_obstacles, ratio_vehicles, wait_before_remove, seed):
@@ -99,7 +92,7 @@ class TrafficModel(mesa.Model):
 
     def add_vehicles(self):
         for i in range(self.vehicles):
-            a = Vehicle(i, None, self.townhall)
+            a = Vehicle(i, self.entry_point, self.townhall)
             self.schedule.add(a)
 
     def step(self):
