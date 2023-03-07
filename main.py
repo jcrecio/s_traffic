@@ -5,9 +5,10 @@ from Semaphore import Semaphore
 from TrafficModel import TrafficModel
 from Vehicle import Vehicle
 
+
 def agent_portrayal(agent):
     portrayal = {
-        "Shape": "circle",
+        "Shape": "arrowHead",
         "Color": "red",
         "Filled": "true",
         "Layer": 0,

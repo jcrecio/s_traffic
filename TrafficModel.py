@@ -4,6 +4,7 @@ import random
 import numpy as np
 from Obstacle import Obstacle
 from Semaphore import Semaphore
+from Townhall import Townhall
 
 from Vehicle import Vehicle
 
@@ -28,6 +29,9 @@ class TrafficModel(mesa.Model):
         self.init()
 
     def init(self):
+        # Agent intermediary which is used by vehicles as a 'GPS' to know how to move
+        self.townhall = Townhall(uuid.uuid4(), self)
+
         # Squares can be empty and have a direction (0,1,2,3) or can be obstacles (-1)
         self.squares = np.zeros((self.rows, self.columns))
 
@@ -95,8 +99,11 @@ class TrafficModel(mesa.Model):
 
     def add_vehicles(self):
         for i in range(self.vehicles):
-            a = Vehicle(i, None, self)
+            a = Vehicle(i, None, self.townhall)
             self.schedule.add(a)
 
     def step(self):
         self.schedule.step()
+
+    def get_square(self, r, c):
+        return self.squares[r, c]
