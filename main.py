@@ -18,23 +18,26 @@ def agent_portrayal(agent):
     if (type(agent) is Vehicle):
         portrayal["Color"] = "blue"
         portrayal["Layer"] = 0
+        portrayal["r"] = 0.3
         return portrayal
         
     if (type(agent) is Semaphore):
         portrayal["Color"] = "yellow"
         portrayal["Layer"] = 0
+        portrayal["r"] = 0.7
         return portrayal
     
     if (type(agent) is Obstacle):
         portrayal["Color"] = "black"
         portrayal["Layer"] = 0
+        portrayal["r"] = 0.6
         return portrayal
 
     return portrayal
 
 grid = mesa.visualization.CanvasGrid(agent_portrayal, 10, 10)
 server = mesa.visualization.ModularServer(
-    TrafficModel, [grid], "Traffic model", {"rows": 10, "columns": 10, "duration": 100, "ratio_obstacles": 0.07, "ratio_vehicles": 0.15, "wait_before_remove": 10, "seed": 3}
+    TrafficModel, [grid], "Traffic model", {"rows": 10, "columns": 10, "duration": 100, "ratio_obstacles": 0.07, "ratio_vehicles": 0.15, "wait_before_remove": 10, "seed": 30}
 )
 server.port = 8521  # The default
 server.launch()

@@ -43,7 +43,9 @@ class TrafficModel(mesa.Model):
                     # Add an obstacle
                     self.squares[i, j] = OBSTACLE
                     # Adds an artificial agent that is used only for visualization
-                    self.schedule.add(Obstacle(uuid.uuid4(), self))
+                    obstacle = Obstacle(uuid.uuid4(), self)
+                    self.schedule.add(obstacle)
+                    self.grid.place_agent(obstacle, (i, j))
                 else:
                     # Add a direction
                     self.squares[i, j] = random.randrange(3)
