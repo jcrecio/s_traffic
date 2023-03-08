@@ -13,3 +13,6 @@ class Townhall(mesa.Agent):
     
     def place_agent(self, position, agent):
         self.model.place_agent(position, agent)
+
+    def move_agent(self, position, agent):
+        self.model.move_agent(position, agent)

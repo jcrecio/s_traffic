@@ -8,7 +8,7 @@ from Vehicle import Vehicle
 
 def agent_portrayal(agent):
     portrayal = {
-        "Shape": "arrowHead",
+        "Shape": "circle",
         "Color": "red",
         "Filled": "true",
         "Layer": 0,
@@ -32,9 +32,9 @@ def agent_portrayal(agent):
 
     return portrayal
 
-grid = mesa.visualization.CanvasGrid(agent_portrayal, 15, 15, 800, 800)
+grid = mesa.visualization.CanvasGrid(agent_portrayal, 10, 10)
 server = mesa.visualization.ModularServer(
-    TrafficModel, [grid], "Traffic model", {"rows": 100, "columns": 100, "duration": 100, "ratio_obstacles": 0.07, "ratio_vehicles": 0.21, "wait_before_remove": 10, "seed": 3}
+    TrafficModel, [grid], "Traffic model", {"rows": 10, "columns": 10, "duration": 100, "ratio_obstacles": 0.07, "ratio_vehicles": 0.15, "wait_before_remove": 10, "seed": 3}
 )
 server.port = 8521  # The default
 server.launch()

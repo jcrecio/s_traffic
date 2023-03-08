@@ -103,6 +103,7 @@ class TrafficModel(mesa.Model):
         for i in range(self.vehicles):
             a = Vehicle(i, self.entry_point, self.townhall)
             self.schedule.add(a)
+            self.grid.place_agent(a, (self.entry_point[0], self.entry_point[1]))
 
     def step(self):
         self.schedule.step()
@@ -123,3 +124,6 @@ class TrafficModel(mesa.Model):
     
     def place_agent(self, position, agent):
         self.grid.place_agent(agent, (position[0], position[1]))
+
+    def move_agent(self, position, agent):
+        self.grid.move_agent(agent, (position[0], position[1]))    
