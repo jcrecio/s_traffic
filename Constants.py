@@ -1,3 +1,4 @@
+SEMAPHORE = -2
 OBSTACLE = -1
 UP = 0
 RIGHT = 1

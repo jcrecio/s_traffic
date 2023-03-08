@@ -34,7 +34,7 @@ def agent_portrayal(agent):
 
 grid = mesa.visualization.CanvasGrid(agent_portrayal, 15, 15, 800, 800)
 server = mesa.visualization.ModularServer(
-    TrafficModel, [grid], "Traffic model", {"rows": 100, "columns": 100, "duration": 100, "ratio_obstacles": 0.15, "ratio_vehicles": 0.21, "wait_before_remove": 10, "seed": 3}
+    TrafficModel, [grid], "Traffic model", {"rows": 100, "columns": 100, "duration": 100, "ratio_obstacles": 0.07, "ratio_vehicles": 0.21, "wait_before_remove": 10, "seed": 3}
 )
 server.port = 8521  # The default
 server.launch()
