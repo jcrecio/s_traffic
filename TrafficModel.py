@@ -99,8 +99,8 @@ class TrafficModel(mesa.Model):
                     directions.append(LEFT)
 
                 # all directions flow in, modify one
-                random_direction = random.randrange(3)
-                directions = range(3)
+                random_direction = random.randrange(4)
+                directions = range(4)
                 match random_direction:
                     case 0: self.squares[i, j-1] = random.choice([x for x in directions if x != DOWN])
                     case 1: self.squares[i+1, j] = random.choice([x for x in directions if x != LEFT])
