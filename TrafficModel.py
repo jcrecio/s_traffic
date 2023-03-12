@@ -52,26 +52,26 @@ class TrafficModel(mesa.Model):
                     self.grid.place_agent(obstacle, (i, j))
                 else:
                     # Add a direction
-                    self.squares[i, j] = random.randrange(3)
+                    self.squares[i, j] = random.randrange(4)
                     if (self.squares[i, j] == UP):
                         up = Up(uuid.uuid4(), self)
                         self.schedule.add(up)
                         self.grid.place_agent(up, (i, j))  
                         continue
                     if (self.squares[i, j] == RIGHT):
-                        up = Right(uuid.uuid4(), self)
-                        self.schedule.add(up)
-                        self.grid.place_agent(up, (i, j))  
+                        right = Right(uuid.uuid4(), self)
+                        self.schedule.add(right)
+                        self.grid.place_agent(right, (i, j))  
                         continue
                     if (self.squares[i, j] == DOWN):
-                        up = Down(uuid.uuid4(), self)
-                        self.schedule.add(up)
-                        self.grid.place_agent(up, (i, j))  
+                        down = Down(uuid.uuid4(), self)
+                        self.schedule.add(down)
+                        self.grid.place_agent(down, (i, j))  
                         continue
                     if (self.squares[i, j] == LEFT):
-                        up = Left(uuid.uuid4(), self)
-                        self.schedule.add(up)
-                        self.grid.place_agent(up, (i, j))  
+                        left = Left(uuid.uuid4(), self)
+                        self.schedule.add(left)
+                        self.grid.place_agent(left, (i, j))  
                         continue
                     
 
@@ -142,11 +142,12 @@ class TrafficModel(mesa.Model):
         if r >= 0 and r < self.rows and c >= 0 and c < self.columns:
             square = self.squares[r, c]
             if (square == SEMAPHORE):
-                agent_in_square = self.grid.get_cell_list_contents([[r, c]])
-                if (type(agent_in_square[0]) is Up): return UP
-                if (type(agent_in_square[0]) is Left): return LEFT
-                if (type(agent_in_square[0]) is Down): return DOWN
-                if (type(agent_in_square[0]) is Right): return RIGHT
+                agents_in_square = self.grid.get_cell_list_contents([[r, c]])
+                other_agent_in_square = type([agent for agent in agents_in_square if not isinstance(agent, Semaphore)][0])
+                if (other_agent_in_square is Up): return UP
+                if (other_agent_in_square is Right): return RIGHT
+                if (other_agent_in_square is Down): return DOWN
+                if (other_agent_in_square is Left): return LEFT
             return square
         
         # Out of bounds square requested

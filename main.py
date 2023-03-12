@@ -26,45 +26,50 @@ def agent_portrayal(agent):
         portrayal["Layer"] = 0
         portrayal["r"] = 0.3
         return portrayal
-        
-    if (type(agent) is Semaphore):
-        portrayal["Color"] = "yellow"
-        portrayal["Layer"] = 0
-        portrayal["r"] = 0.7
-        return portrayal
-    
-    if (type(agent) is Obstacle):
+    elif (type(agent) is Semaphore):
+        x = {
+            "Shape": "image",
+            "Layer": 0,
+            "x": 10,
+            "y": 10,
+            "text": "https://cdn2.iconfinder.com/data/icons/design-4-2/49/168-512.png",
+            "Image": "https://cdn2.iconfinder.com/data/icons/design-4-2/49/168-512.png",
+            "scale": 0.8
+        }
+        return x
+    elif (type(agent) is Obstacle):
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
         portrayal["Color"] = "black"
         portrayal["Layer"] = 0
-        portrayal["r"] = 1
+        portrayal["w"] = 1
+        portrayal["h"] = 1
         return portrayal
-
-    if (type(agent) is Up):
-        portrayal["Color"] = "green"
-        portrayal["Layer"] = 0
-        portrayal["r"] = 0.3
-        return portrayal
-
-    if (type(agent) is Down):
-        portrayal["Color"] = "red"
-        portrayal["Layer"] = 0
-        portrayal["r"] = 0.3
-        return portrayal
-    if (type(agent) is Right):
-        portrayal["Color"] = "orange"
-        portrayal["Layer"] = 0
-        portrayal["r"] = 0.3
-        return portrayal
-    if (type(agent) is Left):
-        portrayal["Color"] = "purple"
-        portrayal["Layer"] = 0
-        portrayal["r"] = 0.3
-        return portrayal
+    
+    portrayal = {
+            "Shape": "arrowHead",
+            "scale": 0.5,
+            "Color": "purple",
+            "Filled": "false",
+            "Layer": 0,
+        }
+    if (type(agent) is Up): 
+        portrayal["heading_x"] = 0
+        portrayal["heading_y"] = 1
+    elif (type(agent) is Down): 
+        portrayal["heading_x"] = 0
+        portrayal["heading_y"] = -1
+    elif (type(agent) is Right): 
+        portrayal["heading_x"] = 1
+        portrayal["heading_y"] = 0
+    elif (type(agent) is Left): 
+        portrayal["heading_x"] = -1
+        portrayal["heading_y"] = 0
     return portrayal
 
 grid = mesa.visualization.CanvasGrid(agent_portrayal, 30, 30, 800, 800)
 server = mesa.visualization.ModularServer(
-    TrafficModel, [grid], "Traffic model", {"rows": 30, "columns": 30, "duration": 100, "ratio_obstacles": 0.3, "ratio_vehicles": 0.35, "wait_before_remove": 10, "seed": 30}
+    TrafficModel, [grid], "Traffic model", {"rows": 30, "columns": 30, "duration": 100, "ratio_obstacles": 0.1, "ratio_vehicles": 0.35, "wait_before_remove": 10, "seed": 30}
 )
 server.port = 8521  # The default
 server.launch()
