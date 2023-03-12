@@ -38,8 +38,8 @@ class Vehicle(mesa.Agent):
             possible_stochastic_directions = self.get_stochastic_directions(direction, self.position)
             stochastic_directions = []
             for dir in possible_stochastic_directions:
-                if self.townhall.get_square(dir[0], dir[1]) == dir[2]:
-                    stochastic_directions.append([dir[0], dir[1]])
+                #if self.townhall.get_square(dir[0], dir[1]) == dir[2]:
+                stochastic_directions.append([dir[0], dir[1]])
             if (len(stochastic_directions) > 0): return random.choice(stochastic_directions)
 
         direction_coordinates = map_direction_coordinates[direction]
@@ -57,13 +57,14 @@ class Vehicle(mesa.Agent):
            #stochastic move?
            return
 
-       agent_next_square = self.townhall.get_agent_on_square(direction_to_move[0], direction_to_move[1])
-       if agent_next_square == None: return
-       if (len(agent_next_square) == 0): 
+       agents_next_square = self.townhall.get_agent_on_square(direction_to_move[0], direction_to_move[1])
+       if agents_next_square == None: return
+       if (len(agents_next_square) == 0): 
            self.move(direction_to_move)
            return
        if content_next_square == SEMAPHORE:
-           if agent_next_square[0].is_open_direction(self.position):
-                self.move(self, content_next_square)
+           is_open_direction = [agent.is_open_direction(self.position) for agent in agents_next_square if type(agent) is Semaphore]
+           if  [is_open_direction[0]]:
+                self.move(direction_to_move)
                 return
        self.move(direction_to_move)

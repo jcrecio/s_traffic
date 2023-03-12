@@ -3,9 +3,13 @@ import mesa
 import random
 import numpy as np
 from Constants import DOWN, LEFT, OBSTACLE, RIGHT, SEMAPHORE, UP
+from Down import Down
+from Left import Left
 from Obstacle import Obstacle
+from Right import Right
 from Semaphore import Semaphore
 from Townhall import Townhall
+from Up import Up
 from Vehicle import Vehicle
 
 class TrafficModel(mesa.Model):
@@ -49,12 +53,36 @@ class TrafficModel(mesa.Model):
                 else:
                     # Add a direction
                     self.squares[i, j] = random.randrange(3)
+                    if (self.squares[i, j] == UP):
+                        up = Up(uuid.uuid4(), self)
+                        self.schedule.add(up)
+                        self.grid.place_agent(up, (i, j))  
+                        continue
+                    if (self.squares[i, j] == RIGHT):
+                        up = Right(uuid.uuid4(), self)
+                        self.schedule.add(up)
+                        self.grid.place_agent(up, (i, j))  
+                        continue
+                    if (self.squares[i, j] == DOWN):
+                        up = Down(uuid.uuid4(), self)
+                        self.schedule.add(up)
+                        self.grid.place_agent(up, (i, j))  
+                        continue
+                    if (self.squares[i, j] == LEFT):
+                        up = Left(uuid.uuid4(), self)
+                        self.schedule.add(up)
+                        self.grid.place_agent(up, (i, j))  
+                        continue
+                    
 
     def add_semaphores(self):
         # Checks with squares have direction intersections to add semaphores
         # If any has intersections from all directions, it modifies one to make the square valid
         for i in range(1, self.rows - 2):
             for j in range(1, self.columns - 2):
+                if (self.squares[i, j] == OBSTACLE):
+                    continue
+
                 inward = 0
                 directions = list()
                 if (self.squares[i, j-1] == DOWN): 
@@ -78,7 +106,7 @@ class TrafficModel(mesa.Model):
                     case 1: self.squares[i+1, j] = random.choice([x for x in directions if x != LEFT])
                     case 2: self.squares[i, j+1] = random.choice([x for x in directions if x != UP])
                     case 3: self.squares[i-1, j] = random.choice([x for x in directions if x != RIGHT])
-                # there is intersection, add semaphore
+                # there is intersection, add semaphore and remove existing agent representing directions
                 if (inward > 1):
                     s = Semaphore(uuid.uuid4(), [i,j], directions, self)
                     self.schedule.add(s)
