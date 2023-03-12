@@ -140,7 +140,14 @@ class TrafficModel(mesa.Model):
 
     def get_square(self, r, c):
         if r >= 0 and r < self.rows and c >= 0 and c < self.columns:
-            return self.squares[r, c]
+            square = self.squares[r, c]
+            if (square == SEMAPHORE):
+                agent_in_square = self.grid.get_cell_list_contents([[r, c]])
+                if (type(agent_in_square[0]) is Up): return UP
+                if (type(agent_in_square[0]) is Left): return LEFT
+                if (type(agent_in_square[0]) is Down): return DOWN
+                if (type(agent_in_square[0]) is Right): return RIGHT
+            return square
         
         # Out of bounds square requested
         return None
