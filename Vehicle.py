@@ -22,6 +22,7 @@ class Vehicle(mesa.Agent):
         super().__init__(unique_id, townhall)
         self.position = position
         self.townhall = townhall
+        self.being_stopped = 0
 
     def get_stochastic_directions(self, direction, position):
         possible_stochastic_directions = []
@@ -38,8 +39,9 @@ class Vehicle(mesa.Agent):
             possible_stochastic_directions = self.get_stochastic_directions(direction, self.position)
             stochastic_directions = []
             for dir in possible_stochastic_directions:
-                #if self.townhall.get_square(dir[0], dir[1]) == dir[2]:
-                stochastic_directions.append([dir[0], dir[1]])
+                if self.townhall.get_square(dir[0], dir[1]) != OBSTACLE \
+                    and self.townhall.get_square(dir[0], dir[1]) != None:
+                    stochastic_directions.append([dir[0], dir[1]])
             if (len(stochastic_directions) > 0): return random.choice(stochastic_directions)
 
         direction_coordinates = map_direction_coordinates[direction]
@@ -51,7 +53,12 @@ class Vehicle(mesa.Agent):
 
     def step(self):
        direction_to_move = self.choose_next_square()
-       if (direction_to_move == None): return
+       if (direction_to_move == None): 
+           self.being_stopped += 1
+           if (self.being_stopped > self.townhall.get_time_allowed_stopped()):
+               self.townhall.communicate_long_stop(self.position)
+           return
+       
        content_next_square = self.townhall.get_square(direction_to_move[0], direction_to_move[1])
        if content_next_square == OBSTACLE: 
            #stochastic move?

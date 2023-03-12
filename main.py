@@ -27,6 +27,10 @@ def agent_portrayal(agent):
         portrayal["r"] = 0.3
         return portrayal
     elif (type(agent) is Semaphore):
+        portrayal["Color"] = "yellow"
+        portrayal["Layer"] = 0
+        portrayal["r"] = 0.9
+        return portrayal
         x = {
             "Shape": "image",
             "Layer": 0,
@@ -54,22 +58,22 @@ def agent_portrayal(agent):
             "Layer": 0,
         }
     if (type(agent) is Up): 
-        portrayal["heading_x"] = 0
-        portrayal["heading_y"] = 1
-    elif (type(agent) is Down): 
-        portrayal["heading_x"] = 0
-        portrayal["heading_y"] = -1
-    elif (type(agent) is Right): 
-        portrayal["heading_x"] = 1
-        portrayal["heading_y"] = 0
-    elif (type(agent) is Left): 
         portrayal["heading_x"] = -1
         portrayal["heading_y"] = 0
+    elif (type(agent) is Down): 
+        portrayal["heading_x"] = 1
+        portrayal["heading_y"] = 0
+    elif (type(agent) is Right): 
+        portrayal["heading_x"] = 0
+        portrayal["heading_y"] = -1
+    elif (type(agent) is Left): 
+        portrayal["heading_x"] = 0
+        portrayal["heading_y"] = 1
     return portrayal
 
-grid = mesa.visualization.CanvasGrid(agent_portrayal, 30, 30, 800, 800)
+grid = mesa.visualization.CanvasGrid(agent_portrayal, 8, 8, 600, 600)
 server = mesa.visualization.ModularServer(
-    TrafficModel, [grid], "Traffic model", {"rows": 30, "columns": 30, "duration": 100, "ratio_obstacles": 0.1, "ratio_vehicles": 0.35, "wait_before_remove": 10, "seed": 30}
+    TrafficModel, [grid], "Traffic model", {"rows": 8, "columns": 8, "duration": 100, "ratio_obstacles": 0., "ratio_vehicles": 0.02, "wait_before_remove": 10, "seed": 30}
 )
 server.port = 8521  # The default
 server.launch()

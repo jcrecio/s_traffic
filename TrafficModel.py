@@ -129,13 +129,18 @@ class TrafficModel(mesa.Model):
 
         self.squares[self.entry_point[0], self.entry_point[1]] = random.choice(valid_directions_for_entry_point)
 
+    def add_vehicle(self, i):
+        a = Vehicle(i, self.entry_point, self.townhall)
+        self.schedule.add(a)
+        self.grid.place_agent(a, (self.entry_point[0], self.entry_point[1]))
+
     def add_vehicles(self):
         for i in range(self.vehicles):
-            a = Vehicle(i, self.entry_point, self.townhall)
-            self.schedule.add(a)
-            self.grid.place_agent(a, (self.entry_point[0], self.entry_point[1]))
+            self.add_vehicle(i)
 
     def step(self):
+        if (self.schedule.steps > self.duration):
+            self.running = False
         self.schedule.step()
 
     def get_square(self, r, c):
@@ -148,6 +153,7 @@ class TrafficModel(mesa.Model):
                 if (other_agent_in_square is Right): return RIGHT
                 if (other_agent_in_square is Down): return DOWN
                 if (other_agent_in_square is Left): return LEFT
+                return OBSTACLE
             return square
         
         # Out of bounds square requested
@@ -164,4 +170,15 @@ class TrafficModel(mesa.Model):
         self.grid.place_agent(agent, (position[0], position[1]))
 
     def move_agent(self, position, agent):
-        self.grid.move_agent(agent, (position[0], position[1]))    
+        self.grid.move_agent(agent, (position[0], position[1]))
+    
+    def get_time_allowed_stopped(self):
+        return self.wait_before_remove
+
+    def communicate_long_stop(self, position):
+        agents = self.get_agent(position[0], position[1])
+        id = agents[0].unique_id
+        self.schedule.remove(agents[0])
+        self.grid.remove_agent(agents[0])
+
+        self.add_vehicle(id)

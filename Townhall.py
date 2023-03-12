@@ -16,3 +16,9 @@ class Townhall(mesa.Agent):
 
     def move_agent(self, position, agent):
         self.model.move_agent(position, agent)
+    
+    def get_time_allowed_stopped(self):
+        return self.model.get_time_allowed_stopped()
+
+    def communicate_long_stop(self, position):
+        return self.model.communicate_long_stop(position)
