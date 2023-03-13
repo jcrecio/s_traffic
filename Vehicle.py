@@ -21,6 +21,7 @@ class Vehicle(mesa.Agent):
     def __init__(self, unique_id, position, townhall) -> None:
         super().__init__(unique_id, townhall)
         self.position = position
+        self.has_moved = False
         self.townhall = townhall
         self.being_stopped = 0
         self.all_time_stopped = 0
@@ -49,21 +50,30 @@ class Vehicle(mesa.Agent):
         return [self.position[0]+direction_coordinates[0], self.position[1]+direction_coordinates[1]]
                     
     def move(self, position):
+        self.has_moved = True
         self.position = position
         self.townhall.move_agent(position, self)
 
     def step(self):
        direction_to_move = self.choose_next_square()
-       if (direction_to_move == None): 
+       if (direction_to_move == None and self.has_moved): 
            self.being_stopped += 1
            if (self.being_stopped > self.townhall.get_time_allowed_stopped()):
                self.townhall.communicate_long_stop(self.position)
            return
        
        content_next_square = self.townhall.get_square(direction_to_move[0], direction_to_move[1])
-       if content_next_square == OBSTACLE: 
+       if content_next_square == OBSTACLE and self.has_moved: 
            #stochastic move?
            self.being_stopped += 1
+           if (self.being_stopped > self.townhall.get_time_allowed_stopped()):
+               self.townhall.communicate_long_stop(self.position)
+           return
+
+       if content_next_square == None and self.has_moved:
+           self.being_stopped += 1
+           if (self.being_stopped > self.townhall.get_time_allowed_stopped()):
+               self.townhall.communicate_long_stop(self.position)
            return
 
        agents_next_square = self.townhall.get_agent_on_square(direction_to_move[0], direction_to_move[1])
@@ -84,3 +94,6 @@ class Vehicle(mesa.Agent):
                self.all_time_stopped += 1
            else:
                self.move(direction_to_move)
+
+    def get_all_time_stopped(self):
+        return self.all_time_stopped

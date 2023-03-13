@@ -60,9 +60,11 @@ def agent_portrayal(agent):
         portrayal["heading_y"] = -1
     return portrayal
 
-grid = mesa.visualization.CanvasGrid(agent_portrayal, 8, 8, 600, 600)
+rows = 30
+columns = 15
+grid = mesa.visualization.CanvasGrid(agent_portrayal, rows, columns, 600, 600)
 server = mesa.visualization.ModularServer(
-    TrafficModel, [grid], "Traffic model", {"rows": 8, "columns": 8, "duration": 100, "ratio_obstacles": 0., "ratio_vehicles": 0.02, "wait_before_remove": 10, "seed": 30}
+    TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 3600, "ratio_obstacles": 0.2, "ratio_vehicles": 0.1, "wait_before_remove": 10, "seed": 30}
 )
 server.port = 8521  # The default
 server.launch()
