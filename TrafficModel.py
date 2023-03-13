@@ -18,6 +18,7 @@ class TrafficModel(mesa.Model):
         self.columns = columns
         self.duration = duration
         self.ratio_obstacles = ratio_obstacles
+        self.ratio_vehicles = ratio_vehicles
         self.vehicles = int((rows * columns) * ratio_vehicles)
         self.wait_before_remove = wait_before_remove
         self.schedule = mesa.time.RandomActivation(self)
@@ -165,8 +166,8 @@ class TrafficModel(mesa.Model):
     def step(self):
         if (self.schedule.steps > self.duration):
             self.running = False
-            print("Tiempo total de vehículos sin avanzr")
-            print(self.total_wait_vehicles)
+            print("Tiempo medio por vehiculo que está parado en semáforo o esperando por otro veíhuclo.")
+            print(self.total_wait_vehicles * self.ratio_vehicles)
         self.schedule.step()
 
     def get_square(self, r, c):
