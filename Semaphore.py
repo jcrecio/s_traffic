@@ -24,12 +24,12 @@ class Semaphore(mesa.Agent):
         self.current_direction = (self.current_direction + 1) % len(self.directions)
     
     # Vehicles talks to semaphores that are close (discovered previously with townhall agent) to see if it is green/open on that direction
-    def is_open_direction(self, position_coming_into):
-        if (position_coming_into[0] < self.position[0]): 
-            return self.current_direction == LEFT
-        if (position_coming_into[1] < self.position[1]): 
+    def is_open_direction(self, position_coming_from):
+        if (position_coming_from[0] < self.position[0]): 
             return self.current_direction == DOWN
-        if (position_coming_into[0] > self.position[0]): 
-            return self.current_direction == RIGHT
-        if (position_coming_into[1] > self.position[1]): 
+        if (position_coming_from[1] < self.position[1]): 
+            return self.current_direction == LEFT
+        if (position_coming_from[0] > self.position[0]): 
             return self.current_direction == UP
+        if (position_coming_from[1] > self.position[1]): 
+            return self.current_direction == LEFT

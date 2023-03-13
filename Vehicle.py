@@ -4,17 +4,17 @@ from Constants import DOWN, LEFT, OBSTACLE, PROBABILITY_STOCHASTIC_MOVEMENT, RIG
 from Semaphore import Semaphore
 
 all_stochastic_directions = {
-    0: [[-1,0, LEFT],[1,0, RIGHT]],
-    1: [[0,-1, UP],[0,1, DOWN]],
-    2: [[1,0, RIGHT],[-1,0, LEFT]],
-    3: [[0,-1, UP],[0,1, DOWN]]
+    0: [[0,-1, LEFT],[0,1, RIGHT]],
+    1: [[-1,0, UP],[1,0, DOWN]],
+    2: [[0,1, RIGHT],[0,-1, LEFT]],
+    3: [[-1,0, UP],[1,0, DOWN]]
 }
 
 map_direction_coordinates = {
-    0: [0,-1],
-    1: [1, 0],
-    2: [0, 1],
-    3: [-1, 0]
+    0: [-1,0],
+    1: [0, 1],
+    2: [1, 0],
+    3: [0, -1]
 }
 
 class Vehicle(mesa.Agent):
@@ -23,6 +23,7 @@ class Vehicle(mesa.Agent):
         self.position = position
         self.townhall = townhall
         self.being_stopped = 0
+        self.all_time_stopped = 0
 
     def get_stochastic_directions(self, direction, position):
         possible_stochastic_directions = []
@@ -62,6 +63,7 @@ class Vehicle(mesa.Agent):
        content_next_square = self.townhall.get_square(direction_to_move[0], direction_to_move[1])
        if content_next_square == OBSTACLE: 
            #stochastic move?
+           self.being_stopped += 1
            return
 
        agents_next_square = self.townhall.get_agent_on_square(direction_to_move[0], direction_to_move[1])
@@ -69,9 +71,16 @@ class Vehicle(mesa.Agent):
        if (len(agents_next_square) == 0): 
            self.move(direction_to_move)
            return
-       if content_next_square == SEMAPHORE:
-           is_open_direction = [agent.is_open_direction(self.position) for agent in agents_next_square if type(agent) is Semaphore]
-           if  [is_open_direction[0]]:
+       
+       semaphore_in_square = [agent for agent in agents_next_square if type(agent) is Semaphore]
+       if (len(semaphore_in_square) > 0 or content_next_square == SEMAPHORE):
+           is_open_direction = semaphore_in_square[0].is_open_direction(self.position)
+           if  is_open_direction:
                 self.move(direction_to_move)
-                return
-       self.move(direction_to_move)
+           else: self.all_time_stopped += 1
+       else: 
+           vehicle_in_square = [agent for agent in agents_next_square if type(agent) is Vehicle]
+           if (len(vehicle_in_square) > 0): 
+               self.all_time_stopped += 1
+           else:
+               self.move(direction_to_move)

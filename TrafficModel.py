@@ -114,7 +114,7 @@ class TrafficModel(mesa.Model):
                     self.squares[i, j] = SEMAPHORE
 
     def generate_entry_point(self):
-        x = random.randrange(3)
+        x = random.randrange(4)
         match x:
             case 0: self.entry_point = [0, random.randrange(self.columns - 1)]
             case 1: self.entry_point = [self.columns - 1, random.randrange(self.rows -1)]

@@ -1,7 +1,6 @@
 import mesa
 from Down import Down
 from Left import Left
-#import matplotlib.pyplot as plt
 
 from Obstacle import Obstacle
 from Right import Right
@@ -31,16 +30,6 @@ def agent_portrayal(agent):
         portrayal["Layer"] = 0
         portrayal["r"] = 0.9
         return portrayal
-        x = {
-            "Shape": "image",
-            "Layer": 0,
-            "x": 10,
-            "y": 10,
-            "text": "https://cdn2.iconfinder.com/data/icons/design-4-2/49/168-512.png",
-            "Image": "https://cdn2.iconfinder.com/data/icons/design-4-2/49/168-512.png",
-            "scale": 0.8
-        }
-        return x
     elif (type(agent) is Obstacle):
         portrayal["Shape"] = "rect"
         portrayal["Filled"] = "true"
@@ -65,10 +54,10 @@ def agent_portrayal(agent):
         portrayal["heading_y"] = 0
     elif (type(agent) is Right): 
         portrayal["heading_x"] = 0
-        portrayal["heading_y"] = -1
+        portrayal["heading_y"] = 1
     elif (type(agent) is Left): 
         portrayal["heading_x"] = 0
-        portrayal["heading_y"] = 1
+        portrayal["heading_y"] = -1
     return portrayal
 
 grid = mesa.visualization.CanvasGrid(agent_portrayal, 8, 8, 600, 600)
