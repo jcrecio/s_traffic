@@ -101,15 +101,17 @@ class TrafficModel(mesa.Model):
                     inward += 1
                     directions.append(LEFT)
 
-                # all directions flow in, modify one
-                random_direction = random.randrange(4)
-                directions = range(4)
-                match random_direction:
-                    case 0: self.squares[i, j-1] = random.choice([x for x in directions if x != DOWN])
-                    case 1: self.squares[i+1, j] = random.choice([x for x in directions if x != LEFT])
-                    case 2: self.squares[i, j+1] = random.choice([x for x in directions if x != UP])
-                    case 3: self.squares[i-1, j] = random.choice([x for x in directions if x != RIGHT])
-                # there is intersection, add semaphore and remove existing agent representing directions
+                if (inward == 4):
+                    # all directions flow in, modify one
+                    random_direction = random.randrange(4)
+                    directions = range(4)
+                    match random_direction:
+                        case 0: self.squares[i, j-1] = random.choice([x for x in directions if x != DOWN])
+                        case 1: self.squares[i+1, j] = random.choice([x for x in directions if x != LEFT])
+                        case 2: self.squares[i, j+1] = random.choice([x for x in directions if x != UP])
+                        case 3: self.squares[i-1, j] = random.choice([x for x in directions if x != RIGHT])
+
+                # there is intersection, add semaphore
                 if (inward > 1):
                     s = Semaphore(uuid.uuid4(), [i,j], directions, self)
                     self.schedule.add(s)
@@ -144,7 +146,7 @@ class TrafficModel(mesa.Model):
             case 1:
                 right = Right(uuid.uuid4(), self)
                 self.grid.place_agent(right, position)
-                self.schedule.add(up)
+                self.schedule.add(right)
             case 2:
                 down = Down(uuid.uuid4(), self)
                 self.grid.place_agent(down, position)
