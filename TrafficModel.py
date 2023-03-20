@@ -23,7 +23,6 @@ class TrafficModel(mesa.Model):
         self.wait_before_remove = wait_before_remove
         self.schedule = mesa.time.RandomActivation(self)
         random.seed(seed)
-
         self.total_wait_vehicles = 0
         
         self.init()
@@ -32,7 +31,7 @@ class TrafficModel(mesa.Model):
         # Agent intermediary which is used by vehicles as a 'GPS' to know how to move
         self.townhall = Townhall(uuid.uuid4(), self)
 
-        # Squares can be empty and have a direction (0,1,2,3) or can be obstacles (-1)
+        # Squares can be empty and have a direction (0,1,2,3) or can be obstacles (-1) or semaphores (-2)
         self.squares = np.zeros((self.rows, self.columns))
 
         # Mesa grid with the agents
@@ -43,13 +42,13 @@ class TrafficModel(mesa.Model):
         self.generate_entry_point()
         self.add_vehicles()
 
+    """ Adds all the squares in the grid, meaning it creates all the directions and obstacles in the grid """
     def add_squares(self):
         for i in range(self.rows):
             for j in range(self.columns):
                 if (random.random() < self.ratio_obstacles):
                     # Add an obstacle
                     self.squares[i, j] = OBSTACLE
-                    # Adds an artificial agent that is used only for visualization
                     obstacle = Obstacle(uuid.uuid4(), self)
                     self.schedule.add(obstacle)
                     self.grid.place_agent(obstacle, (i, j))
@@ -76,11 +75,13 @@ class TrafficModel(mesa.Model):
                         self.schedule.add(left)
                         self.grid.place_agent(left, (i, j))  
                         continue
-                    
 
+    """
+    Adds semaphores in all the squares of the grid that have intersections
+    Besides, if any square have all directions flowing in, it modifies randomly one to avoid close loops
+    """
     def add_semaphores(self):
-        # Checks with squares have direction intersections to add semaphores
-        # If any has intersections from all directions, it modifies one to make the square valid
+
         for i in range(1, self.rows - 2):
             for j in range(1, self.columns - 2):
                 if (self.squares[i, j] == OBSTACLE):
@@ -102,7 +103,7 @@ class TrafficModel(mesa.Model):
                     directions.append(LEFT)
 
                 if (inward == 4):
-                    # all directions flow in, modify one
+                    # all directions flow in, modify at least one to avoid closed loops in one square
                     random_direction = random.randrange(4)
                     directions = range(4)
                     match random_direction:
@@ -118,6 +119,7 @@ class TrafficModel(mesa.Model):
                     self.grid.place_agent(s, (i, j))
                     self.squares[i, j] = SEMAPHORE
 
+    """ It decides the entry point where all the cars start the journey """
     def generate_entry_point(self):
         x = random.randrange(4)
         match x:
@@ -156,15 +158,20 @@ class TrafficModel(mesa.Model):
                 self.grid.place_agent(left, position)
                 self.schedule.add(left)
 
+    """
+    Adds a vehicle with a specific ID
+    """
     def add_vehicle(self, i):
         a = Vehicle(i, self.entry_point, self.townhall)
         self.schedule.add(a)
         self.grid.place_agent(a, (self.entry_point[0], self.entry_point[1]))
 
+    """ Adds all the vehicles specified in the constructor """
     def add_vehicles(self):
         for i in range(self.vehicles):
             self.add_vehicle(i)
 
+    """ It goes 1 step in the simulation until it reaches the maximum duration """
     def step(self):
         if (self.schedule.steps > self.duration):
             self.running = False
@@ -177,7 +184,8 @@ class TrafficModel(mesa.Model):
             square = self.squares[r, c]
             if (square == SEMAPHORE):
                 agents_in_square = self.grid.get_cell_list_contents([[r, c]])
-                other_agent_in_square = type([agent for agent in agents_in_square if not isinstance(agent, Semaphore)][0])
+                other_agent_in_square \
+                    = type([agent for agent in agents_in_square if not isinstance(agent, Semaphore)][0])
                 if (other_agent_in_square is Up): return UP
                 if (other_agent_in_square is Right): return RIGHT
                 if (other_agent_in_square is Down): return DOWN
@@ -204,6 +212,7 @@ class TrafficModel(mesa.Model):
     def get_time_allowed_stopped(self):
         return self.wait_before_remove
 
+    """ When a vehicle is stopped for long time, it is considered parked so it returs to entry point """
     def communicate_long_stop(self, position):
         agents = self.get_agent(position[0], position[1])
         agent_to_remove = [agent for agent in agents if type(agent) is Vehicle][0]
