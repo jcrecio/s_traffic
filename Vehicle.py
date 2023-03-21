@@ -88,7 +88,7 @@ class Vehicle(mesa.Agent):
        if (len(agents_next_square) == 0): 
            self.move(direction_to_move)
            return
-       
+
        content_next_square = self.townhall.get_square(direction_to_move[0], direction_to_move[1])
        semaphore_in_square = [agent for agent in agents_next_square if type(agent) is Semaphore]
        if (len(semaphore_in_square) > 0 or content_next_square == SEMAPHORE):
@@ -98,11 +98,10 @@ class Vehicle(mesa.Agent):
            else: self.all_time_stopped += 1
        else: 
            vehicle_in_square = [agent for agent in agents_next_square if type(agent) is Vehicle]
-           if (len(vehicle_in_square) > 0 or direction_to_move == OBSTACLE): 
+           if (len(vehicle_in_square) > 0): 
                self.all_time_stopped += 1
            else:
-               obstacles_in_square = [agent for agent in agents_next_square if type(agent) is Obstacle]
-               if (len(obstacles_in_square) > 0):
+               if (self.townhall.get_square(direction_to_move[0], direction_to_move[1]) == OBSTACLE):
                    self.all_time_stopped += 1
                else: self.move(direction_to_move)
 
