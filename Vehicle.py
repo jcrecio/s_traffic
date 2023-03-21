@@ -73,8 +73,8 @@ class Vehicle(mesa.Agent):
         coordinates_current_direction = map_direction_coordinates[current_direction]
         available_directions = []
         content_front = self.townhall.get_square(
-            coordinates_current_direction[0], 
-            coordinates_current_direction[1])
+            self.position[0] + coordinates_current_direction[0], 
+            self.position[1] + coordinates_current_direction[1])
         
         if content_front != OBSTACLE and content_front != None:
             available_directions.append([coordinates_current_direction[0] + self.position[0],
