@@ -1,11 +1,10 @@
-import random
 import mesa
 from Constants import DOWN, LEFT, OBSTACLE, PROBABILITY_STOCHASTIC_MOVEMENT, RIGHT, SEMAPHORE, UP
 from Obstacle import Obstacle
 from Semaphore import Semaphore
 
 """ This is used to obtain the orthogonal directions for a given direction.
-    Examples: UP    -> [LEFT, RIGHT]
+    Examples: UP    -> [LEFT, RIGHT] or [← , →]
               RIGHT -> [UP, DOWN]
 """
 orthogonal_directions = {
@@ -26,6 +25,10 @@ map_direction_coordinates = {
     3: [0, -1]
 }
 
+
+""" In this model, the vehicles move like in a normal road, left, front or right, as long as those
+    directions are accessible.
+"""
 class Vehicle(mesa.Agent):
     def __init__(self, unique_id, position, townhall) -> None:
         super().__init__(unique_id, townhall)
@@ -103,12 +106,17 @@ class Vehicle(mesa.Agent):
 
     def step(self):
        possible_directions_to_move = self.get_available_directions()
-       if ((possible_directions_to_move == None or len(possible_directions_to_move) == 0) and self.has_moved): 
+       if ((possible_directions_to_move == None or len(possible_directions_to_move) == 0)): 
            self.being_stopped += 1
+           self.all_time_stopped += 1
            if (self.being_stopped > self.townhall.get_time_allowed_stopped()):
                self.townhall.communicate_long_stop(self.position)
            return
     
+       if (len(possible_directions_to_move) == 0):
+           self.all_time_stopped += 1
+           return
+       
        direction_chosen = self.random.randrange(len(possible_directions_to_move))
        self.try_move(possible_directions_to_move[direction_chosen])
 

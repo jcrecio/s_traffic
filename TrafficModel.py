@@ -43,7 +43,8 @@ class TrafficModel(mesa.Model):
         self.generate_entry_point()
         self.add_vehicles()
 
-    """ Adds all the squares in the grid, meaning it creates all the directions and obstacles in the grid """
+    """ Adds all the squares in the grid, meaning it creates all the directions and obstacles in the grid 
+    """
     def add_squares(self):
         for i in range(self.rows):
             for j in range(self.columns):
@@ -176,7 +177,7 @@ class TrafficModel(mesa.Model):
         if (self.schedule.steps > self.duration):
             self.running = False
             print("Tiempo medio por vehiculo que está parado en semáforo o esperando por otro veíhuclo.")
-            print(self.total_wait_vehicles * self.ratio_vehicles)
+            print(self.total_wait_vehicles / self.vehicles)
         self.schedule.step()
 
     def get_square(self, r, c):
