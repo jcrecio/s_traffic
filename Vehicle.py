@@ -39,8 +39,8 @@ class Vehicle(mesa.Agent):
     def get_orthogonal_directions(self, direction, position):
         possible_orthogonal_directions = []
 
-        orthogonal_directions = orthogonal_directions[direction]
-        for s in orthogonal_directions:
+        all_orthogonal_directions = orthogonal_directions[direction]
+        for s in all_orthogonal_directions:
             possible_orthogonal_directions.append([position[0] + s[0], position[1] + s[1], s[2]])
             
         return possible_orthogonal_directions
