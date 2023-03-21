@@ -1,3 +1,10 @@
+'''
+Author: Juan Carlos Recio Abad
+Date: Match 23rd of 2023
+
+Traffic simulation for subject "Sistemas Multiagente" of Universitary course
+"Máster en ingeniería del software e inteligencia artificial"
+'''
 import mesa
 from Back import Back
 from Left import Left

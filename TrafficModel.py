@@ -38,15 +38,16 @@ class TrafficModel(mesa.Model):
         # Mesa grid with the agents
         self.grid = mesa.space.MultiGrid(self.rows, self.columns, False)
 
+        # Adds all the content
         self.add_squares()
         self.add_semaphores()
         self.generate_entry_point()
         self.add_vehicles()
 
     # Adds a specific object into a square, like a direction as FRONT, BACK, etc or an OBSTACLE
-    def add_square(self, i, j, object):
+    def add_square(self, position, object):
         self.schedule.add(object)
-        self.grid.place_agent(object, (i, j)) 
+        self.grid.place_agent(object, position) 
 
     """ Adds all the squares in the grid, meaning it creates all the directions and obstacles in the grid 
     """
@@ -56,14 +57,14 @@ class TrafficModel(mesa.Model):
                 if (random.random() < self.ratio_obstacles):
                     # Add an obstacle
                     self.squares[i, j] = OBSTACLE
-                    self.add_square(i, j, Obstacle(uuid.uuid4(), self))
+                    self.add_square((i, j), Obstacle(uuid.uuid4(), self))
                 else:
                     # Add a direction
                     self.squares[i, j] = random.randrange(4)
-                    if (self.squares[i, j] == FRONT): self.add_square(i, j, Front(uuid.uuid4(), self)) 
-                    elif (self.squares[i, j] == RIGHT): self.add_square(i, j, Right(uuid.uuid4(), self))  
-                    elif (self.squares[i, j] == BACK): self.add_square(i, j, Back(uuid.uuid4(), self))  
-                    elif (self.squares[i, j] == LEFT): self.add_square(i, j, Left(uuid.uuid4(), self))  
+                    if (self.squares[i, j] == FRONT): self.add_square((i, j), Front(uuid.uuid4(), self)) 
+                    elif (self.squares[i, j] == RIGHT): self.add_square((i, j), Right(uuid.uuid4(), self))  
+                    elif (self.squares[i, j] == BACK): self.add_square((i, j), Back(uuid.uuid4(), self))  
+                    elif (self.squares[i, j] == LEFT): self.add_square((i, j), Left(uuid.uuid4(), self))  
     """
     Adds semaphores in all the squares of the grid that have intersections
     Besides, if any square have all directions flowing in, it modifies randomly one to avoid close loops
@@ -108,6 +109,7 @@ class TrafficModel(mesa.Model):
 
     """ It decides the entry point where all the cars start the journey """
     def generate_entry_point(self):
+        # It randomly chooses one of the four edges of the grid
         x = random.randrange(4)
         match x:
             case 0: self.entry_point = [0, random.randrange(self.columns - 1)]
@@ -115,6 +117,8 @@ class TrafficModel(mesa.Model):
             case 2: self.entry_point = [self.rows - 1, random.randrange(self.columns - 1)]
             case 3: self.entry_point = [random.randrange(self.rows - 1), 0]
 
+        # Based on the edge, it generates all valid entry directions
+        # For example, if it´s on the right edge, a valid direction could be left, and down as long as it´s not in the bottom
         valid_directions_for_entry_point = []
         if (self.entry_point[0] > 0): valid_directions_for_entry_point.append(FRONT)
         if (self.entry_point[0] < self.columns - 1): valid_directions_for_entry_point.append(BACK)
@@ -123,27 +127,20 @@ class TrafficModel(mesa.Model):
 
         self.squares[self.entry_point[0], self.entry_point[1]] = random.choice(valid_directions_for_entry_point)
         agents_to_remove = self.grid.get_cell_list_contents([[self.entry_point[0],self.entry_point[1]]])
+
+        # This artificially removes agents representing obstacles, directions, etc in the grid used for representation
+        # because the entry point has been generated in this square
+        # I could have done the other way around, first generate the entrypoint and later filling the grid
         for agent in agents_to_remove:
             self.grid.remove_agent(agent)
             self.schedule.remove(agent)
+
         position = self.entry_point[0], self.entry_point[1]
         match self.squares[self.entry_point[0], self.entry_point[1]]:
-            case 0:
-                up = Front(uuid.uuid4(), self)
-                self.grid.place_agent(up, position)
-                self.schedule.add(up)
-            case 1:
-                right = Right(uuid.uuid4(), self)
-                self.grid.place_agent(right, position)
-                self.schedule.add(right)
-            case 2:
-                down = Back(uuid.uuid4(), self)
-                self.grid.place_agent(down, position)
-                self.schedule.add(down)
-            case 3:
-                left = Left(uuid.uuid4(), self)
-                self.grid.place_agent(left, position)
-                self.schedule.add(left)
+            case 0: self.add_square(position, Front(uuid.uuid4(), self))
+            case 1: self.add_square(position, Right(uuid.uuid4(), self))
+            case 2: self.add_square(position, Back(uuid.uuid4(), self))
+            case 3: self.add_square(position, Left(uuid.uuid4(), self))
 
     """
     Adds a vehicle with a specific ID

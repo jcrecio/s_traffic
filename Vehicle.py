@@ -59,9 +59,14 @@ class Vehicle(mesa.Agent):
         self.position = position
         self.townhall.move_agent(position, self)
 
-    """ It gets the available directions for the vehicle in the current position """
+    """ It gets the available directions for the vehicle in the current position 
+        They can be the leading front direction plus the lateral ones if they are active and accessible
+        For instance, if a vehicle is a square that goes LEFT, posible directions are UP and DOWN as long as they are
+        active and accessible, this is: LEFT square contains 'LEFT' direction and it does not have a vehicle or obstacle.
+        
+    """
+    
     def get_available_directions(self):
-        # Direction indicated by the current square
         current_direction = self.townhall.get_square(self.position[0], self.position[1])
         possible_lateral_directions = self.get_orthogonal_directions(current_direction, self.position)
         
