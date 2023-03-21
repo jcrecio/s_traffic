@@ -122,7 +122,7 @@ class Vehicle(mesa.Agent):
        if ((possible_directions_to_move == None or len(possible_directions_to_move) == 0)): 
            self.wait_for_park += 1
            if (self.wait_for_park > self.townhall.get_time_allowed_stopped()):
-               self.townhall.communicate_long_stop(self.position)
+               self.townhall.park_vehicle(self.position)
            return
        
        # From all posible directions, choose one of them and try to move in that direction

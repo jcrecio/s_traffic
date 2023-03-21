@@ -77,7 +77,7 @@ rows = 20
 columns = 20
 grid = mesa.visualization.CanvasGrid(agent_portrayal, rows, columns, 600, 600)
 server = mesa.visualization.ModularServer(
-    TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 3600, "ratio_obstacles": 0.12, "ratio_vehicles": 0.05, "wait_before_remove": 10, "seed": 3}
+    TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 300, "ratio_obstacles": 0.12, "ratio_vehicles": 0.05, "wait_before_remove": 10, "seed": 3}
 )
 server.port = 8521  # The default
 server.launch()

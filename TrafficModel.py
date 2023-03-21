@@ -165,8 +165,8 @@ class TrafficModel(mesa.Model):
             self.total_waiting_semaphores = 0
             self.total_waiting_vehicles = 0
             for vehicle in self.vehicle_list:
-                print("Time waiting in semaphores by vehicle " + vehicle.unique_id + " : " + str(vehicle.get_time_waiting_for_semaphores()))
-                print("Time waiting for other vehicles by vehicle " + vehicle.unique_id + " : " + str(vehicle.get_time_waiting_for_vehicles()))
+                print("Time waiting in semaphores by vehicle " + str(vehicle.unique_id) + " : " + str(vehicle.get_time_waiting_for_semaphores()))
+                print("Time waiting for other vehicles by vehicle " + str(vehicle.unique_id) + " : " + str(vehicle.get_time_waiting_for_vehicles()))
                 self.total_waiting_semaphores += vehicle.get_time_waiting_for_semaphores()
                 self.total_waiting_vehicles += vehicle.get_time_waiting_for_vehicles()
             print("Accumulated time waiting for semaphores: " + str(self.total_waiting_semaphores))
