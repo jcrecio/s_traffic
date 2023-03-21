@@ -12,15 +12,15 @@ from Semaphore import Semaphore
               RIGHT -> orthogonals are [FRONT, DOWN]
 """
 orthogonal_directions = {
-    0: [[0,-1, LEFT],[0,1, RIGHT]],
-    1: [[-1,0, FRONT],[1,0, BACK]],
-    2: [[0,1, RIGHT],[0,-1, LEFT]],
-    3: [[-1,0, FRONT],[1,0, BACK]]
+    0: [[0,-1, LEFT],[0,1, RIGHT]], # ↑: (←,→)
+    1: [[-1,0, FRONT],[1,0, BACK]], # →: (↑,↓)
+    2: [[0,1, RIGHT],[0,-1, LEFT]], # ↓: (←,→)
+    3: [[-1,0, FRONT],[1,0, BACK]]  # ←: (↑,↓)
 }
 
-""" It returns the coordinates of a given direction. 
-    Example: UP   -> -1,0
-             LEFT -> 0,-1
+""" It returns the coordinates of a given direction.
+    Example: FRONT -> -1,0
+             LEFT  -> 0,-1
 """
 map_direction_coordinates = {
     0: [-1,0],
@@ -73,8 +73,8 @@ class Vehicle(mesa.Agent):
                                  coordinates_current_direction[1] + self.position[1]])
             
         for dir in possible_lateral_directions:
-            if self.townhall.get_square(dir[0], dir[1]) != OBSTACLE \
-                and self.townhall.get_square(dir[0], dir[1]) != None:
+            square_in_direction = self.townhall.get_square(dir[0], dir[1])
+            if square_in_direction != OBSTACLE and square_in_direction != None:
                 available_directions.append([dir[0], dir[1]])
 
         return available_directions
@@ -109,17 +109,16 @@ class Vehicle(mesa.Agent):
 
     def step(self):
        possible_directions_to_move = self.get_available_directions()
+
+       # If no possible direction to move:
        if ((possible_directions_to_move == None or len(possible_directions_to_move) == 0)): 
            self.being_stopped += 1
            self.all_time_stopped += 1
            if (self.being_stopped > self.townhall.get_time_allowed_stopped()):
                self.townhall.communicate_long_stop(self.position)
            return
-    
-       if (len(possible_directions_to_move) == 0):
-           self.all_time_stopped += 1
-           return
        
+       # From all posible directions, choose one of them and try to move in that direction
        direction_chosen = self.random.randrange(len(possible_directions_to_move))
        self.try_move(possible_directions_to_move[direction_chosen])
 
