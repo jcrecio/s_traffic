@@ -3,8 +3,8 @@
 """
 
 import mesa
+import random
 from Constants import BACK, LEFT, OBSTACLE, RIGHT, SEMAPHORE, FRONT
-from Obstacle import Obstacle
 from Semaphore import Semaphore
 
 """ This is used to obtain the orthogonal directions for a given direction.
@@ -41,6 +41,9 @@ class Vehicle(mesa.Agent):
         # all_time_stopped measures all the time a car is stopped because of a semaphore, other vehicle
         # or an obstacle in the direction taken
         self.all_time_stopped = 0
+
+        # Random color used in representation
+        self.color = self.get_random_color()
 
     """ It returns the orthogonal directions for a given one. """
     def get_orthogonal_directions(self, direction, position):
@@ -105,7 +108,6 @@ class Vehicle(mesa.Agent):
                    self.all_time_stopped += 1
                else: self.move(direction_to_move)
 
-
     def step(self):
        possible_directions_to_move = self.get_available_directions()
 
@@ -123,3 +125,10 @@ class Vehicle(mesa.Agent):
 
     def get_all_time_stopped(self):
         return self.all_time_stopped
+    
+    def get_color(self):
+        return self.color
+    
+    def get_random_color(self):
+        color = "".join([random.choice("0123456789abcdef") for _ in range(6)])
+        return "#" + color

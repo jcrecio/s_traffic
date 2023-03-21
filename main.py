@@ -18,11 +18,10 @@ def agent_portrayal(agent):
         "Filled": "true",
         "Layer": 0,
         "r": 0.5,
-        "Text": "(r: " + str(agent.pos[0]) + " , c: " + str(agent.pos[1]) + ")"
     }
 
     if (type(agent) is Vehicle):
-        portrayal["Color"] = "blue"
+        portrayal["Color"] = agent.get_color()
         portrayal["Layer"] = 0
         portrayal["r"] = 0.3
         return portrayal

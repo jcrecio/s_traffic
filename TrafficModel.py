@@ -43,6 +43,11 @@ class TrafficModel(mesa.Model):
         self.generate_entry_point()
         self.add_vehicles()
 
+    # Adds a specific object into a square, like a direction as FRONT, BACK, etc or an OBSTACLE
+    def add_square(self, i, j, object):
+        self.schedule.add(object)
+        self.grid.place_agent(object, (i, j)) 
+
     """ Adds all the squares in the grid, meaning it creates all the directions and obstacles in the grid 
     """
     def add_squares(self):
@@ -51,33 +56,14 @@ class TrafficModel(mesa.Model):
                 if (random.random() < self.ratio_obstacles):
                     # Add an obstacle
                     self.squares[i, j] = OBSTACLE
-                    obstacle = Obstacle(uuid.uuid4(), self)
-                    self.schedule.add(obstacle)
-                    self.grid.place_agent(obstacle, (i, j))
+                    self.add_square(i, j, Obstacle(uuid.uuid4(), self))
                 else:
                     # Add a direction
                     self.squares[i, j] = random.randrange(4)
-                    if (self.squares[i, j] == FRONT):
-                        up = Front(uuid.uuid4(), self)
-                        self.schedule.add(up)
-                        self.grid.place_agent(up, (i, j))  
-                        continue
-                    if (self.squares[i, j] == RIGHT):
-                        right = Right(uuid.uuid4(), self)
-                        self.schedule.add(right)
-                        self.grid.place_agent(right, (i, j))  
-                        continue
-                    if (self.squares[i, j] == BACK):
-                        down = Back(uuid.uuid4(), self)
-                        self.schedule.add(down)
-                        self.grid.place_agent(down, (i, j))  
-                        continue
-                    if (self.squares[i, j] == LEFT):
-                        left = Left(uuid.uuid4(), self)
-                        self.schedule.add(left)
-                        self.grid.place_agent(left, (i, j))  
-                        continue
-
+                    if (self.squares[i, j] == FRONT): self.add_square(i, j, Front(uuid.uuid4(), self)) 
+                    elif (self.squares[i, j] == RIGHT): self.add_square(i, j, Right(uuid.uuid4(), self))  
+                    elif (self.squares[i, j] == BACK): self.add_square(i, j, Back(uuid.uuid4(), self))  
+                    elif (self.squares[i, j] == LEFT): self.add_square(i, j, Left(uuid.uuid4(), self))  
     """
     Adds semaphores in all the squares of the grid that have intersections
     Besides, if any square have all directions flowing in, it modifies randomly one to avoid close loops
@@ -85,7 +71,7 @@ class TrafficModel(mesa.Model):
     def add_semaphores(self):
         for i in range(1, self.rows - 2):
             for j in range(1, self.columns - 2):
-                if (self.squares[i, j] == OBSTACLE):  continue
+                if (self.squares[i, j] == OBSTACLE): continue
 
                 # Inward stores how many directions flow in the square
                 inward = 0
