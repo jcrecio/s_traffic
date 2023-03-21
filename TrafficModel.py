@@ -12,6 +12,7 @@ from Townhall import Townhall
 from Up import Up
 from Vehicle import Vehicle
 
+""" Model for traffic simulation """
 class TrafficModel(mesa.Model):
     def __init__(self, rows, columns, duration, ratio_obstacles, ratio_vehicles, wait_before_remove, seed):
         self.rows = rows
@@ -81,12 +82,11 @@ class TrafficModel(mesa.Model):
     Besides, if any square have all directions flowing in, it modifies randomly one to avoid close loops
     """
     def add_semaphores(self):
-
         for i in range(1, self.rows - 2):
             for j in range(1, self.columns - 2):
-                if (self.squares[i, j] == OBSTACLE):
-                    continue
+                if (self.squares[i, j] == OBSTACLE):  continue
 
+                # Inward stores how many directions flow in the square
                 inward = 0
                 directions = list()
                 if (self.squares[i, j-1] == DOWN): 

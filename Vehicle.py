@@ -4,13 +4,21 @@ from Constants import DOWN, LEFT, OBSTACLE, PROBABILITY_STOCHASTIC_MOVEMENT, RIG
 from Obstacle import Obstacle
 from Semaphore import Semaphore
 
-all_stochastic_directions = {
+""" This is used to obtain the orthogonal directions for a given direction.
+    Examples: UP    -> [LEFT, RIGHT]
+              RIGHT -> [UP, DOWN]
+"""
+orthogonal_directions = {
     0: [[0,-1, LEFT],[0,1, RIGHT]],
     1: [[-1,0, UP],[1,0, DOWN]],
     2: [[0,1, RIGHT],[0,-1, LEFT]],
     3: [[-1,0, UP],[1,0, DOWN]]
 }
 
+""" It returns the coordinates of a given direction. 
+    Example: UP   -> -1,0
+             LEFT -> 0,-1
+"""
 map_direction_coordinates = {
     0: [-1,0],
     1: [0, 1],
@@ -27,53 +35,47 @@ class Vehicle(mesa.Agent):
         self.being_stopped = 0
         self.all_time_stopped = 0
 
-    def get_stochastic_directions(self, direction, position):
-        possible_stochastic_directions = []
+    """ It returns the orthogonal directions for a given one. """
+    def get_orthogonal_directions(self, direction, position):
+        possible_orthogonal_directions = []
 
-        stochastic_directions = all_stochastic_directions[direction]
-        for s in stochastic_directions:
-            possible_stochastic_directions.append([position[0] + s[0], position[1] + s[1], s[2]])
+        orthogonal_directions = orthogonal_directions[direction]
+        for s in orthogonal_directions:
+            possible_orthogonal_directions.append([position[0] + s[0], position[1] + s[1], s[2]])
             
-        return possible_stochastic_directions
-
-    def choose_next_square(self):
-        direction = self.townhall.get_square(self.position[0], self.position[1])
-        if (random.random() < PROBABILITY_STOCHASTIC_MOVEMENT): 
-            possible_stochastic_directions = self.get_stochastic_directions(direction, self.position)
-            stochastic_directions = []
-            for dir in possible_stochastic_directions:
-                if self.townhall.get_square(dir[0], dir[1]) != OBSTACLE \
-                    and self.townhall.get_square(dir[0], dir[1]) != None:
-                    stochastic_directions.append([dir[0], dir[1]])
-            if (len(stochastic_directions) > 0): return random.choice(stochastic_directions)
-
-        direction_coordinates = map_direction_coordinates[direction]
-        return [self.position[0]+direction_coordinates[0], self.position[1]+direction_coordinates[1]]
-                    
+        return possible_orthogonal_directions
+          
     def move(self, position):
         self.has_moved = True
         self.position = position
         self.townhall.move_agent(position, self)
 
+    """ It gets the available directions for the vehicle in the current position """
     def get_available_directions(self):
-        direction_front = self.townhall.get_square(self.position[0], self.position[1])
-        if (direction_front != OBSTACLE):
-            possible_lateral_directions = self.get_stochastic_directions(direction_front, self.position)
-        else:
-            possible_lateral_directions = []
-        d_front = map_direction_coordinates[direction_front]
+        # Direction indicated by the current square
+        current_direction = self.townhall.get_square(self.position[0], self.position[1])
+        
+        # if (direction_front != OBSTACLE):
+        possible_lateral_directions = self.get_orthogonal_directions(current_direction, self.position)
+        # else:
+        #     possible_lateral_directions = []
+        
+        coordinates_current_direction = map_direction_coordinates[current_direction]
         available_directions = []
-        content_front = self.townhall.get_square(d_front[0], d_front[1])
+        content_front = self.townhall.get_square(coordinates_current_direction[0], coordinates_current_direction[1])
         if content_front != OBSTACLE \
                 and content_front != None:
-            available_directions.append([d_front[0] + self.position[0],
-                                 d_front[1] + self.position[1]])
+            available_directions.append([coordinates_current_direction[0] + self.position[0],
+                                 coordinates_current_direction[1] + self.position[1]])
         for dir in possible_lateral_directions:
             if self.townhall.get_square(dir[0], dir[1]) != OBSTACLE \
                 and self.townhall.get_square(dir[0], dir[1]) != None:
                 available_directions.append([dir[0], dir[1]])
         return available_directions
 
+    """ It tries to move in a specific direction as long as the possible semaphores allows it, and there is no 
+        vehicles or obstacles in the way.
+    """
     def try_move(self, direction_to_move):
        agents_next_square = self.townhall.get_agent_on_square(direction_to_move[0], direction_to_move[1])
        if agents_next_square == None: return
