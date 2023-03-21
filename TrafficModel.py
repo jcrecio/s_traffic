@@ -21,6 +21,7 @@ class TrafficModel(mesa.Model):
         self.ratio_obstacles = ratio_obstacles
         self.ratio_vehicles = ratio_vehicles
         self.vehicles = int((rows * columns) * ratio_vehicles)
+        self.vehicle_list = list()
         self.wait_before_remove = wait_before_remove
         self.schedule = mesa.time.RandomActivation(self)
         random.seed(seed)
@@ -149,18 +150,29 @@ class TrafficModel(mesa.Model):
         a = Vehicle(i, self.entry_point, self.townhall)
         self.schedule.add(a)
         self.grid.place_agent(a, (self.entry_point[0], self.entry_point[1]))
+        return a
 
     """ Adds all the vehicles specified in the constructor """
     def add_vehicles(self):
         for i in range(self.vehicles):
-            self.add_vehicle(i)
+            vehicle = self.add_vehicle(i)
+            self.vehicle_list.append(vehicle)
 
     """ It goes 1 step in the simulation until it reaches the maximum duration """
     def step(self):
         if (self.schedule.steps > self.duration):
             self.running = False
-            print("Tiempo medio por vehiculo que está parado en semáforo o esperando por otro veíhuclo.")
-            print(self.total_wait_vehicles / self.vehicles)
+            self.total_waiting_semaphores = 0
+            self.total_waiting_vehicles = 0
+            for vehicle in self.vehicle_list:
+                print("Time waiting in semaphores by vehicle " + vehicle.unique_id + " : " + str(vehicle.get_time_waiting_for_semaphores()))
+                print("Time waiting for other vehicles by vehicle " + vehicle.unique_id + " : " + str(vehicle.get_time_waiting_for_vehicles()))
+                self.total_waiting_semaphores += vehicle.get_time_waiting_for_semaphores()
+                self.total_waiting_vehicles += vehicle.get_time_waiting_for_vehicles()
+            print("Accumulated time waiting for semaphores: " + str(self.total_waiting_semaphores))
+            print("Accumulated time waiting for vehicles: " + str(self.total_waiting_vehicles))
+            print("Average time waiting for semaphores: " + str(self.total_waiting_semaphores / len(self.vehicle_list)))
+            print("Average time waiting for vehicles: " + str(self.total_waiting_vehicles  / len(self.vehicle_list)))
         self.schedule.step()
 
     def get_square(self, r, c):
@@ -196,12 +208,13 @@ class TrafficModel(mesa.Model):
     def get_time_allowed_stopped(self):
         return self.wait_before_remove
 
-    """ When a vehicle is stopped for long time, it is considered parked so it returs to entry point """
-    def communicate_long_stop(self, position):
+    """ When a vehicle is going to park because it cannot longer move """
+    def park_vehicle(self, position):
         agents = self.get_agent(position[0], position[1])
         agent_to_remove = [agent for agent in agents if type(agent) is Vehicle][0]
-        self.total_wait_vehicles += agent_to_remove.get_all_time_stopped()
         self.schedule.remove(agent_to_remove)
         self.grid.remove_agent(agent_to_remove)
 
-        self.add_vehicle(uuid.uuid4())
+        # Puts a new car in the grid
+        vehicle = self.add_vehicle(uuid.uuid4())
+        self.vehicle_list.append(vehicle)

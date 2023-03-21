@@ -35,12 +35,14 @@ class Vehicle(mesa.Agent):
         self.position = position
         self.townhall = townhall
 
-        # being_stopped is used to determine if a car cannot longer move so it´s reset to the entry point
-        self.being_stopped = 0
+        # time waiting for other vehicles
+        self.time_waiting_for_vehicles = 0
 
-        # all_time_stopped measures all the time a car is stopped because of a semaphore, other vehicle
-        # or an obstacle in the direction taken
-        self.all_time_stopped = 0
+        # time waiting in semaphores
+        self.time_waiting_for_semaphores = 0
+
+        # wait_for_park is used to determine if a car cannot longer move so it is parked
+        self.wait_for_park = 0
 
         # Random color used in representation
         self.color = self.get_random_color()
@@ -63,7 +65,6 @@ class Vehicle(mesa.Agent):
         They can be the leading front direction plus the lateral ones if they are active and accessible
         For instance, if a vehicle is a square that goes LEFT, posible directions are UP and DOWN as long as they are
         active and accessible, this is: LEFT square contains 'LEFT' direction and it does not have a vehicle or obstacle.
-        
     """
     
     def get_available_directions(self):
@@ -82,7 +83,7 @@ class Vehicle(mesa.Agent):
             
         for dir in possible_lateral_directions:
             square_in_direction = self.townhall.get_square(dir[0], dir[1])
-            if square_in_direction != OBSTACLE and square_in_direction != None:
+            if square_in_direction == dir[2]:
                 available_directions.append([dir[0], dir[1]])
 
         return available_directions
@@ -103,11 +104,12 @@ class Vehicle(mesa.Agent):
            is_open_direction = semaphore_in_square[0].is_open_direction(self.position)
            if  is_open_direction:
                 self.move(direction_to_move)
-           else: self.all_time_stopped += 1
+           else: 
+               self.time_waiting_for_semaphores += 1
        else: 
            vehicle_in_square = [agent for agent in agents_next_square if type(agent) is Vehicle]
-           if (len(vehicle_in_square) > 0): 
-               self.all_time_stopped += 1
+           if (len(vehicle_in_square) > 0):
+               self.time_waiting_for_vehicles += 1
            else:
                if (self.townhall.get_square(direction_to_move[0], direction_to_move[1]) == OBSTACLE):
                    self.all_time_stopped += 1
@@ -118,9 +120,8 @@ class Vehicle(mesa.Agent):
 
        # If no possible direction to move:
        if ((possible_directions_to_move == None or len(possible_directions_to_move) == 0)): 
-           self.being_stopped += 1
-           self.all_time_stopped += 1
-           if (self.being_stopped > self.townhall.get_time_allowed_stopped()):
+           self.wait_for_park += 1
+           if (self.wait_for_park > self.townhall.get_time_allowed_stopped()):
                self.townhall.communicate_long_stop(self.position)
            return
        
@@ -128,8 +129,11 @@ class Vehicle(mesa.Agent):
        direction_chosen = self.random.randrange(len(possible_directions_to_move))
        self.try_move(possible_directions_to_move[direction_chosen])
 
-    def get_all_time_stopped(self):
-        return self.all_time_stopped
+    def get_time_waiting_for_semaphores(self):
+        return self.time_waiting_for_semaphores
+    
+    def get_time_waiting_for_vehicles(self):
+        return self.time_waiting_for_vehicles
     
     def get_color(self):
         return self.color
