@@ -1,6 +1,6 @@
 SEMAPHORE = -2
 OBSTACLE = -1
-UP = 0
+FRONT = 0
 RIGHT = 1
-DOWN = 2
+BACK = 2
 LEFT = 3

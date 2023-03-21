@@ -1,17 +1,21 @@
+""" In this model, the vehicles move like in a normal road, left, front or right, as long as those
+    directions are accessible.
+"""
+
 import mesa
-from Constants import DOWN, LEFT, OBSTACLE, PROBABILITY_STOCHASTIC_MOVEMENT, RIGHT, SEMAPHORE, UP
+from Constants import BACK, LEFT, OBSTACLE, RIGHT, SEMAPHORE, FRONT
 from Obstacle import Obstacle
 from Semaphore import Semaphore
 
 """ This is used to obtain the orthogonal directions for a given direction.
-    Examples: UP    -> [LEFT, RIGHT] or [← , →]
-              RIGHT -> [UP, DOWN]
+    Examples: FRONT -> orthogonals are [LEFT, RIGHT]
+              RIGHT -> orthogonals are [FRONT, DOWN]
 """
 orthogonal_directions = {
     0: [[0,-1, LEFT],[0,1, RIGHT]],
-    1: [[-1,0, UP],[1,0, DOWN]],
+    1: [[-1,0, FRONT],[1,0, BACK]],
     2: [[0,1, RIGHT],[0,-1, LEFT]],
-    3: [[-1,0, UP],[1,0, DOWN]]
+    3: [[-1,0, FRONT],[1,0, BACK]]
 }
 
 """ It returns the coordinates of a given direction. 
@@ -25,17 +29,17 @@ map_direction_coordinates = {
     3: [0, -1]
 }
 
-
-""" In this model, the vehicles move like in a normal road, left, front or right, as long as those
-    directions are accessible.
-"""
 class Vehicle(mesa.Agent):
     def __init__(self, unique_id, position, townhall) -> None:
         super().__init__(unique_id, townhall)
         self.position = position
-        self.has_moved = False
         self.townhall = townhall
+
+        # being_stopped is used to determine if a car cannot longer move so it´s reset to the entry point
         self.being_stopped = 0
+
+        # all_time_stopped measures all the time a car is stopped because of a semaphore, other vehicle
+        # or an obstacle in the direction taken
         self.all_time_stopped = 0
 
     """ It returns the orthogonal directions for a given one. """
@@ -49,7 +53,6 @@ class Vehicle(mesa.Agent):
         return possible_orthogonal_directions
           
     def move(self, position):
-        self.has_moved = True
         self.position = position
         self.townhall.move_agent(position, self)
 
@@ -57,23 +60,23 @@ class Vehicle(mesa.Agent):
     def get_available_directions(self):
         # Direction indicated by the current square
         current_direction = self.townhall.get_square(self.position[0], self.position[1])
-        
-        # if (direction_front != OBSTACLE):
         possible_lateral_directions = self.get_orthogonal_directions(current_direction, self.position)
-        # else:
-        #     possible_lateral_directions = []
         
         coordinates_current_direction = map_direction_coordinates[current_direction]
         available_directions = []
-        content_front = self.townhall.get_square(coordinates_current_direction[0], coordinates_current_direction[1])
-        if content_front != OBSTACLE \
-                and content_front != None:
+        content_front = self.townhall.get_square(
+            coordinates_current_direction[0], 
+            coordinates_current_direction[1])
+        
+        if content_front != OBSTACLE and content_front != None:
             available_directions.append([coordinates_current_direction[0] + self.position[0],
                                  coordinates_current_direction[1] + self.position[1]])
+            
         for dir in possible_lateral_directions:
             if self.townhall.get_square(dir[0], dir[1]) != OBSTACLE \
                 and self.townhall.get_square(dir[0], dir[1]) != None:
                 available_directions.append([dir[0], dir[1]])
+
         return available_directions
 
     """ It tries to move in a specific direction as long as the possible semaphores allows it, and there is no 
@@ -119,7 +122,6 @@ class Vehicle(mesa.Agent):
        
        direction_chosen = self.random.randrange(len(possible_directions_to_move))
        self.try_move(possible_directions_to_move[direction_chosen])
-
 
     def get_all_time_stopped(self):
         return self.all_time_stopped

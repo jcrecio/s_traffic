@@ -2,14 +2,14 @@ import uuid
 import mesa
 import random
 import numpy as np
-from Constants import DOWN, LEFT, OBSTACLE, RIGHT, SEMAPHORE, UP
-from Down import Down
+from Constants import BACK, LEFT, OBSTACLE, RIGHT, SEMAPHORE, FRONT
+from Back import Back
 from Left import Left
 from Obstacle import Obstacle
 from Right import Right
 from Semaphore import Semaphore
 from Townhall import Townhall
-from Up import Up
+from Front import Front
 from Vehicle import Vehicle
 
 """ Model for traffic simulation """
@@ -57,8 +57,8 @@ class TrafficModel(mesa.Model):
                 else:
                     # Add a direction
                     self.squares[i, j] = random.randrange(4)
-                    if (self.squares[i, j] == UP):
-                        up = Up(uuid.uuid4(), self)
+                    if (self.squares[i, j] == FRONT):
+                        up = Front(uuid.uuid4(), self)
                         self.schedule.add(up)
                         self.grid.place_agent(up, (i, j))  
                         continue
@@ -67,8 +67,8 @@ class TrafficModel(mesa.Model):
                         self.schedule.add(right)
                         self.grid.place_agent(right, (i, j))  
                         continue
-                    if (self.squares[i, j] == DOWN):
-                        down = Down(uuid.uuid4(), self)
+                    if (self.squares[i, j] == BACK):
+                        down = Back(uuid.uuid4(), self)
                         self.schedule.add(down)
                         self.grid.place_agent(down, (i, j))  
                         continue
@@ -90,15 +90,15 @@ class TrafficModel(mesa.Model):
                 # Inward stores how many directions flow in the square
                 inward = 0
                 directions = list()
-                if (self.squares[i, j-1] == DOWN): 
+                if (self.squares[i, j-1] == BACK): 
                     inward += 1
-                    directions.append(UP)
+                    directions.append(FRONT)
                 if (self.squares[i+1, j] == LEFT): 
                     inward += 1
                     directions.append(RIGHT)
-                if (self.squares[i, j+1] == UP): 
+                if (self.squares[i, j+1] == FRONT): 
                     inward +=1
-                    directions.append(DOWN)
+                    directions.append(BACK)
                 if (self.squares[i-1, j] == RIGHT): 
                     inward += 1
                     directions.append(LEFT)
@@ -108,9 +108,9 @@ class TrafficModel(mesa.Model):
                     random_direction = random.randrange(4)
                     directions = range(4)
                     match random_direction:
-                        case 0: self.squares[i, j-1] = random.choice([x for x in directions if x != DOWN])
+                        case 0: self.squares[i, j-1] = random.choice([x for x in directions if x != BACK])
                         case 1: self.squares[i+1, j] = random.choice([x for x in directions if x != LEFT])
-                        case 2: self.squares[i, j+1] = random.choice([x for x in directions if x != UP])
+                        case 2: self.squares[i, j+1] = random.choice([x for x in directions if x != FRONT])
                         case 3: self.squares[i-1, j] = random.choice([x for x in directions if x != RIGHT])
 
                 # there is intersection, add semaphore
@@ -130,8 +130,8 @@ class TrafficModel(mesa.Model):
             case 3: self.entry_point = [random.randrange(self.rows - 1), 0]
 
         valid_directions_for_entry_point = []
-        if (self.entry_point[0] > 0): valid_directions_for_entry_point.append(UP)
-        if (self.entry_point[0] < self.columns - 1): valid_directions_for_entry_point.append(DOWN)
+        if (self.entry_point[0] > 0): valid_directions_for_entry_point.append(FRONT)
+        if (self.entry_point[0] < self.columns - 1): valid_directions_for_entry_point.append(BACK)
         if (self.entry_point[1] > 0): valid_directions_for_entry_point.append(LEFT)
         if (self.entry_point[1] < self.rows - 1): valid_directions_for_entry_point.append(RIGHT)
 
@@ -143,7 +143,7 @@ class TrafficModel(mesa.Model):
         position = self.entry_point[0], self.entry_point[1]
         match self.squares[self.entry_point[0], self.entry_point[1]]:
             case 0:
-                up = Up(uuid.uuid4(), self)
+                up = Front(uuid.uuid4(), self)
                 self.grid.place_agent(up, position)
                 self.schedule.add(up)
             case 1:
@@ -151,7 +151,7 @@ class TrafficModel(mesa.Model):
                 self.grid.place_agent(right, position)
                 self.schedule.add(right)
             case 2:
-                down = Down(uuid.uuid4(), self)
+                down = Back(uuid.uuid4(), self)
                 self.grid.place_agent(down, position)
                 self.schedule.add(down)
             case 3:
@@ -187,9 +187,9 @@ class TrafficModel(mesa.Model):
                 agents_in_square = self.grid.get_cell_list_contents([[r, c]])
                 other_agent_in_square \
                     = type([agent for agent in agents_in_square if not isinstance(agent, Semaphore)][0])
-                if (other_agent_in_square is Up): return UP
+                if (other_agent_in_square is Front): return FRONT
                 if (other_agent_in_square is Right): return RIGHT
-                if (other_agent_in_square is Down): return DOWN
+                if (other_agent_in_square is Back): return BACK
                 if (other_agent_in_square is Left): return LEFT
                 return OBSTACLE
             return square

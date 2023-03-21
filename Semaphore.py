@@ -1,7 +1,7 @@
 import mesa
 import random
 
-from Constants import DOWN, LEFT, RIGHT, UP
+from Constants import BACK, LEFT, RIGHT, FRONT
 
 class Semaphore(mesa.Agent):
     def __init__(self, unique_id, position, directions, model) -> None:
@@ -26,10 +26,10 @@ class Semaphore(mesa.Agent):
     # Vehicles talks to semaphores that are close (discovered previously with townhall agent) to see if it is green/open on that direction
     def is_open_direction(self, position_coming_from):
         if (position_coming_from[0] < self.position[0]): 
-            return self.current_direction == DOWN
+            return self.current_direction == BACK
         if (position_coming_from[1] < self.position[1]): 
             return self.current_direction == LEFT
         if (position_coming_from[0] > self.position[0]): 
-            return self.current_direction == UP
+            return self.current_direction == FRONT
         if (position_coming_from[1] > self.position[1]): 
             return self.current_direction == LEFT

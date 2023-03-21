@@ -1,5 +1,5 @@
 import mesa
-from Down import Down
+from Back import Back
 from Left import Left
 
 from Obstacle import Obstacle
@@ -7,7 +7,7 @@ from Right import Right
 from Semaphore import Semaphore
 
 from TrafficModel import TrafficModel
-from Up import Up
+from Front import Front
 from Vehicle import Vehicle
 
 
@@ -47,10 +47,10 @@ def agent_portrayal(agent):
             "Filled": "false",
             "Layer": 0,
         }
-    if (type(agent) is Up): 
+    if (type(agent) is Front): 
         portrayal["heading_x"] = -1
         portrayal["heading_y"] = 0
-    elif (type(agent) is Down): 
+    elif (type(agent) is Back): 
         portrayal["heading_x"] = 1
         portrayal["heading_y"] = 0
     elif (type(agent) is Right): 
