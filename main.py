@@ -6,16 +6,11 @@ Traffic simulation for subject "Sistemas Multiagente" of Universitary course
 "Máster en ingeniería del software e inteligencia artificial"
 '''
 import mesa
-from Back import Back
-from Left import Left
 
-from Obstacle import Obstacle
-from Right import Right
 from Semaphore import Semaphore
-
 from TrafficModel import TrafficModel
-from Front import Front
 from Vehicle import Vehicle
+from Directions import Back, EntryPoint, Front, Left, Right, Obstacle
 
 
 def agent_portrayal(agent):
@@ -33,9 +28,26 @@ def agent_portrayal(agent):
         portrayal["r"] = 0.3
         return portrayal
     elif (type(agent) is Semaphore):
-        portrayal["Color"] = "yellow"
-        portrayal["Layer"] = 0
-        portrayal["r"] = 0.9
+        portrayal = {
+                "Shape": "arrowHead",
+                "scale": 0.55,
+                "Color": "green",
+                "Filled": "false",
+                "Layer": 0,
+                "arrowhead_shape": {"width": 15, "height": 10}
+        }
+        if (agent.current_direction == 0): 
+            portrayal["heading_x"] = -1
+            portrayal["heading_y"] = 0
+        elif (agent.current_direction == 2): 
+            portrayal["heading_x"] = 1
+            portrayal["heading_y"] = 0
+        elif (agent.current_direction == 1): 
+            portrayal["heading_x"] = 0
+            portrayal["heading_y"] = 1
+        elif (agent.current_direction == 3): 
+            portrayal["heading_x"] = 0
+            portrayal["heading_y"] = -1
         return portrayal
     elif (type(agent) is Obstacle):
         portrayal["Shape"] = "rect"
@@ -44,6 +56,14 @@ def agent_portrayal(agent):
         portrayal["Layer"] = 0
         portrayal["w"] = 1
         portrayal["h"] = 1
+        return portrayal
+    elif (type(agent) is EntryPoint):
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["Color"] = "red"
+        portrayal["Layer"] = 0
+        portrayal["w"] = 0.9
+        portrayal["h"] = 0.9
         return portrayal
     
     portrayal = {
@@ -73,11 +93,13 @@ def agent_portrayal(agent):
 # server = mesa.visualization.ModularServer(
 #     TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 3600, "ratio_obstacles": 0.2, "ratio_vehicles": 0.1, "wait_before_remove": 10, "seed": 30}
 # )
-rows = 20
-columns = 20
+rows = 50
+columns = 50
 grid = mesa.visualization.CanvasGrid(agent_portrayal, rows, columns, 600, 600)
 server = mesa.visualization.ModularServer(
-    TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 300, "ratio_obstacles": 0.12, "ratio_vehicles": 0.05, "wait_before_remove": 10, "seed": 3}
+    TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 300,
+                                             "ratio_obstacles": 1/9, "ratio_vehicles": 1/25, "wait_before_remove": 10, 
+                                             "seed": 2}
 )
 server.port = 8521  # The default
 server.launch()

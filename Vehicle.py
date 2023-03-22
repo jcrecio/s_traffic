@@ -29,6 +29,13 @@ map_direction_coordinates = {
     3: [0, -1]
 }
 
+opposite_directions = {
+    LEFT: RIGHT,
+    RIGHT: LEFT,
+    FRONT: BACK,
+    BACK: FRONT
+}
+
 class Vehicle(mesa.Agent):
     def __init__(self, unique_id, position, townhall) -> None:
         super().__init__(unique_id, townhall)
@@ -69,7 +76,7 @@ class Vehicle(mesa.Agent):
     
     def get_available_directions(self):
         current_direction = self.townhall.get_square(self.position[0], self.position[1])
-        possible_lateral_directions = self.get_orthogonal_directions(current_direction, self.position)
+        possible_directions = self.get_orthogonal_directions(current_direction, self.position)
         
         coordinates_current_direction = map_direction_coordinates[current_direction]
         available_directions = []
@@ -78,12 +85,13 @@ class Vehicle(mesa.Agent):
             self.position[1] + coordinates_current_direction[1])
         
         if content_front != OBSTACLE and content_front != None:
-            available_directions.append([coordinates_current_direction[0] + self.position[0],
-                                 coordinates_current_direction[1] + self.position[1]])
+            if opposite_directions[content_front] != current_direction:
+                available_directions.append([coordinates_current_direction[0] + self.position[0],
+                                    coordinates_current_direction[1] + self.position[1]])
             
-        for dir in possible_lateral_directions:
+        for dir in possible_directions:
             square_in_direction = self.townhall.get_square(dir[0], dir[1])
-            if square_in_direction == dir[2]:
+            if square_in_direction == dir[2] or square_in_direction == SEMAPHORE:
                 available_directions.append([dir[0], dir[1]])
 
         return available_directions

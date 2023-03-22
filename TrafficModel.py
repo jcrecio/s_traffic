@@ -3,14 +3,28 @@ import mesa
 import random
 import numpy as np
 from Constants import BACK, LEFT, OBSTACLE, RIGHT, SEMAPHORE, FRONT
-from Back import Back
-from Left import Left
-from Obstacle import Obstacle
-from Right import Right
+from Directions import Back, EntryPoint, Front, Left, Right, Obstacle
 from Semaphore import Semaphore
 from Townhall import Townhall
-from Front import Front
 from Vehicle import Vehicle
+
+""" It returns the coordinates of a given direction.
+    Example: FRONT -> -1,0
+             LEFT  -> 0,-1
+"""
+map_direction_coordinates = {
+    0: [-1,0],
+    1: [0, 1],
+    2: [1, 0],
+    3: [0, -1]
+}
+
+opposite_directions = {
+    LEFT: RIGHT,
+    RIGHT: LEFT,
+    FRONT: BACK,
+    BACK: FRONT
+}
 
 """ Model for traffic simulation """
 class TrafficModel(mesa.Model):
@@ -42,6 +56,8 @@ class TrafficModel(mesa.Model):
         # Adds all the content
         self.add_squares()
         self.add_semaphores()
+        self.remove_opposite_directions()
+        self.point_edges_to_inside()
         self.generate_entry_point()
         self.add_vehicles()
 
@@ -49,6 +65,27 @@ class TrafficModel(mesa.Model):
     def add_square(self, position, object):
         self.schedule.add(object)
         self.grid.place_agent(object, position) 
+
+    def add_direction_in_square(self, i, j, forbidden_direction = None):
+        if (forbidden_direction == None):
+            self.squares[i, j] = random.randrange(4)
+        else:
+            match forbidden_direction:
+                case 0: self.squares[i, j] = random.choice([1,2,3])
+                case 1: self.squares[i, j] = random.choice([0,2,3])
+                case 2: self.squares[i, j] = random.choice([0,1,3])
+                case 3: self.squares[i, j] = random.choice([0,1,2])
+
+        if (self.squares[i, j] == FRONT): self.add_square((i, j), Front(uuid.uuid4(), self)) 
+        elif (self.squares[i, j] == RIGHT): self.add_square((i, j), Right(uuid.uuid4(), self))  
+        elif (self.squares[i, j] == BACK): self.add_square((i, j), Back(uuid.uuid4(), self))  
+        elif (self.squares[i, j] == LEFT): self.add_square((i, j), Left(uuid.uuid4(), self)) 
+            
+    def remove_square_content(self, i, j):
+        content = self.get_agent(i, j)
+        for agent in content:
+            self.grid.remove_agent(agent)
+            self.schedule.remove(agent)
 
     """ Adds all the squares in the grid, meaning it creates all the directions and obstacles in the grid 
     """
@@ -61,11 +98,7 @@ class TrafficModel(mesa.Model):
                     self.add_square((i, j), Obstacle(uuid.uuid4(), self))
                 else:
                     # Add a direction
-                    self.squares[i, j] = random.randrange(4)
-                    if (self.squares[i, j] == FRONT): self.add_square((i, j), Front(uuid.uuid4(), self)) 
-                    elif (self.squares[i, j] == RIGHT): self.add_square((i, j), Right(uuid.uuid4(), self))  
-                    elif (self.squares[i, j] == BACK): self.add_square((i, j), Back(uuid.uuid4(), self))  
-                    elif (self.squares[i, j] == LEFT): self.add_square((i, j), Left(uuid.uuid4(), self))  
+                    self.add_direction_in_square(i, j)
     """
     Adds semaphores in all the squares of the grid that have intersections
     Besides, if any square have all directions flowing in, it modifies randomly one to avoid close loops
@@ -103,10 +136,43 @@ class TrafficModel(mesa.Model):
 
                 # there is intersection, add semaphore
                 if (inward > 1):
+                    self.remove_square_content(i, j)
                     s = Semaphore(uuid.uuid4(), [i,j], directions, self)
                     self.schedule.add(s)
                     self.grid.place_agent(s, (i, j))
                     self.squares[i, j] = SEMAPHORE
+
+    """ It tries to remove all the oppposite directions that defeat the purpose of moving
+        Removing some might bring others to be opposite, the intent is to minimize the opposites as much as possible
+    """
+    def remove_opposite_directions(self):
+        for remove_iteration in range(10):
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    current_direction = self.get_square(i, j)
+                    if (current_direction == None or current_direction < 0): continue
+                    current_direction_coordinates = map_direction_coordinates[current_direction]
+                    pointing_square_direction = self.get_square(i + current_direction_coordinates[0], j + current_direction_coordinates[1])
+                    if (opposite_directions[current_direction] == pointing_square_direction):
+                        self.remove_square_content(i, j)
+                        self.add_direction_in_square(i, j, pointing_square_direction)
+
+    def point_edges_to_inside(self):
+        for c in range(self.rows):
+            if (self.get_square(0, c) == 0): 
+                self.remove_square_content(0, c)
+                self.add_direction_in_square(0, c, 0)
+            if (self.get_square(self.rows - 1, c) == 2):
+                self.remove_square_content(self.rows - 1, c)
+                self.add_direction_in_square(self.rows - 1, c, 2)
+        for r in range(self.columns):
+            if (self.get_square(0, r) == 3):
+                self.remove_square_content(0, r)
+                self.add_direction_in_square(0, r, 3)
+            if (self.get_square(self.columns - 1, r) == 2):
+                self.remove_square_content(self.columns - 1, r)
+                self.add_direction_in_square(self.columns - 1, r, 2)
+
 
     """ It decides the entry point where all the cars start the journey """
     def generate_entry_point(self):
@@ -143,6 +209,9 @@ class TrafficModel(mesa.Model):
             case 2: self.add_square(position, Back(uuid.uuid4(), self))
             case 3: self.add_square(position, Left(uuid.uuid4(), self))
 
+        ep = EntryPoint(uuid.uuid4(), self)
+        self.schedule.add(ep)
+        self.grid.place_agent(ep, (self.entry_point[0], self.entry_point[1]))
     """
     Adds a vehicle with a specific ID
     """
@@ -180,8 +249,9 @@ class TrafficModel(mesa.Model):
             square = self.squares[r, c]
             if (square == SEMAPHORE):
                 agents_in_square = self.grid.get_cell_list_contents([[r, c]])
-                other_agent_in_square \
-                    = type([agent for agent in agents_in_square if not isinstance(agent, Semaphore)][0])
+                non_semaphores = [agent for agent in agents_in_square if not isinstance(agent, Semaphore)]
+                if (len(non_semaphores) == 0): return OBSTACLE
+                other_agent_in_square = non_semaphores[0]
                 if (other_agent_in_square is Front): return FRONT
                 if (other_agent_in_square is Right): return RIGHT
                 if (other_agent_in_square is Back): return BACK
