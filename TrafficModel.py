@@ -92,7 +92,7 @@ class TrafficModel(mesa.Model):
                     directions.append(LEFT)
 
                 if (inward == 4):
-                    # all directions flow in, modify at least one to avoid closed loops in one square
+                    # all directions flow in same square, modify at least one to avoid closed loops in one square
                     random_direction = random.randrange(4)
                     directions = range(4)
                     match random_direction:

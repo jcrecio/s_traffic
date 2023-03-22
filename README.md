@@ -3,7 +3,7 @@
 
 Alumno: Juan Carlos Recio Abad
 
-Todo el código, documentación y comentarios están en inglés para que puedan publicarse y sea accesible a más gente después de su uso en la asignatura siempre y cuando el profesor diese permiso.
+Todo el código, documentación y comentarios están en inglés para que puedan publicarse y sea accesible a más gente después de su uso en la asignatura siempre y cuando el profesor de permiso.
 
 Las clases, métodos y en general todo el código intentan ser autoexplicativos de lo que se hace.
 
