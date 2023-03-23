@@ -93,8 +93,8 @@ def agent_portrayal(agent):
 # server = mesa.visualization.ModularServer(
 #     TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 3600, "ratio_obstacles": 0.2, "ratio_vehicles": 0.1, "wait_before_remove": 10, "seed": 30}
 # )
-rows = 50
-columns = 50
+rows = 10
+columns = 10
 grid = mesa.visualization.CanvasGrid(agent_portrayal, rows, columns, 600, 600)
 server = mesa.visualization.ModularServer(
     TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 300,

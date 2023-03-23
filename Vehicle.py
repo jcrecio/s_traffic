@@ -74,7 +74,7 @@ class Vehicle(mesa.Agent):
         active and accessible, this is: LEFT square contains 'LEFT' direction and it does not have a vehicle or obstacle.
     """
     
-    def get_available_directions(self):
+    def get_legal_available_directions(self):
         current_direction = self.townhall.get_square(self.position[0], self.position[1])
         possible_directions = self.get_orthogonal_directions(current_direction, self.position)
         
@@ -96,32 +96,25 @@ class Vehicle(mesa.Agent):
 
         return available_directions
 
-    # """ It tries to move in a specific direction as long as the possible semaphores allows it, and there is no 
-    #     vehicles or obstacles in the way.
-    # """
-    # def try_move(self, direction_to_move):
-    #    agents_next_square = self.townhall.get_agent_on_square(direction_to_move[0], direction_to_move[1])
-    #    if agents_next_square == None: return
-    #    if (len(agents_next_square) == 0): 
-    #        self.move(direction_to_move)
-    #        return
+    def get_illegal_available_directions(self):
+        current_direction = self.townhall.get_square(self.position[0], self.position[1])
+        possible_directions = self.get_orthogonal_directions(current_direction, self.position)
+        
+        coordinates_current_direction = map_direction_coordinates[current_direction]
+        available_directions = []
+        content_front = self.townhall.get_square(
+            self.position[0] + coordinates_current_direction[0], 
+            self.position[1] + coordinates_current_direction[1])
+        
+        if content_front != OBSTACLE and content_front != None:
+            if opposite_directions[content_front] != current_direction:
+                available_directions.append([coordinates_current_direction[0] + self.position[0],
+                                    coordinates_current_direction[1] + self.position[1]])
+            
+        for dir in possible_directions:
+            available_directions.append([dir[0], dir[1]])
 
-    #    content_next_square = self.townhall.get_square(direction_to_move[0], direction_to_move[1])
-    #    semaphore_in_square = [agent for agent in agents_next_square if type(agent) is Semaphore]
-    #    if (len(semaphore_in_square) > 0 or content_next_square == SEMAPHORE):
-    #        is_open_direction = semaphore_in_square[0].is_open_direction(self.position)
-    #        if  is_open_direction:
-    #             self.move(direction_to_move)
-    #        else: 
-    #            self.time_waiting_for_semaphores += 1
-    #    else: 
-    #        vehicle_in_square = [agent for agent in agents_next_square if type(agent) is Vehicle]
-    #        if (len(vehicle_in_square) > 0):
-    #            self.time_waiting_for_vehicles += 1
-    #        else:
-    #            if (self.townhall.get_square(direction_to_move[0], direction_to_move[1]) == OBSTACLE):
-    #                self.all_time_stopped += 1
-    #            else: self.move(direction_to_move)
+        return available_directions
 
     def get_accesible_directions(self, possible_directions):
         accessible_directions = list()
@@ -145,13 +138,23 @@ class Vehicle(mesa.Agent):
         return accessible_directions
 
     def step(self):
-       possible_directions_to_move = self.get_available_directions()
+       possible_directions_to_move = self.get_legal_available_directions()
 
        # If no possible direction to move:
        if ((possible_directions_to_move == None or len(possible_directions_to_move) == 0)): 
            self.wait_for_park += 1
-           if (self.wait_for_park > self.townhall.get_time_allowed_stopped()):
-               self.townhall.park_vehicle(self.position)
+           possible_illegal_directions_to_move = self.get_illegal_available_directions()
+           if (len(possible_illegal_directions_to_move) == 0 and 
+               self.wait_for_park > self.townhall.get_time_allowed_stopped()):
+                self.townhall.park_vehicle(self.position)
+           else:
+               accesible_directions = self.get_accesible_directions(possible_illegal_directions_to_move)
+               if (len(accesible_directions) > 0):
+                    direction_chosen = self.random.randrange(len(accesible_directions))
+                    self.move(accesible_directions[direction_chosen])
+               else:
+                    self.townhall.park_vehicle(self.position)
+                   
            return
        
        # From all posible directions, filter out the ones that are not feasible now
@@ -161,14 +164,15 @@ class Vehicle(mesa.Agent):
        if (len(accesible_directions) > 0):
             direction_chosen = self.random.randrange(len(accesible_directions))
             self.move(accesible_directions[direction_chosen])
-       else: # if not available accessible directions, choose any to decide what to wait for (vehicle or semaphore)
+       else: # if not available accessible directions
            direction_chosen = possible_directions_to_move[self.random.randrange(len(possible_directions_to_move))]
            agents_next_square = self.townhall.get_agent_on_square(direction_chosen[0], direction_chosen[1])
            content_next_square = self.townhall.get_square(direction_chosen[0], direction_chosen[1])
            semaphore_in_square = [agent for agent in agents_next_square if type(agent) is Semaphore]
            if (len(semaphore_in_square) > 0 or content_next_square == SEMAPHORE):
                 self.time_waiting_for_semaphores += 1
-           else: self.time_waiting_for_vehicles += 1
+           else:
+               self.time_waiting_for_vehicles += 1
 
     def get_time_waiting_for_semaphores(self):
         return self.time_waiting_for_semaphores
