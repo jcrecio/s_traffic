@@ -7,8 +7,9 @@ class Semaphore(mesa.Agent):
     def __init__(self, unique_id, position, directions, model) -> None:
         super().__init__(unique_id, model)
         self.position = position
-        self.directions = directions
-        self.time_each_direction = random.randint(1, 4)
+        # self.directions = directions
+        self.directions = [0,1,2,3]
+        self.time_each_direction = random.randint(4, 12)
         
         self.current_direction = random.randrange(len(directions))
         self.timer = self.time_each_direction
@@ -28,8 +29,11 @@ class Semaphore(mesa.Agent):
         if (position_coming_from[0] < self.position[0]): 
             return self.current_direction == BACK
         if (position_coming_from[1] < self.position[1]): 
-            return self.current_direction == LEFT
+            return self.current_direction == RIGHT
         if (position_coming_from[0] > self.position[0]): 
             return self.current_direction == FRONT
         if (position_coming_from[1] > self.position[1]): 
             return self.current_direction == LEFT
+    
+    def get_current_direction(self):
+        return self.current_direction

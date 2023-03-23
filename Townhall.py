@@ -22,3 +22,6 @@ class Townhall(mesa.Agent):
 
     def park_vehicle(self, position):
         return self.model.park_vehicle(position)
+
+    def get_direction_open_for_semaphore(self, position):
+        return self.model.get_direction_open_for_semaphore(position)

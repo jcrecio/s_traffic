@@ -250,17 +250,22 @@ class TrafficModel(mesa.Model):
             if (square == SEMAPHORE):
                 agents_in_square = self.grid.get_cell_list_contents([[r, c]])
                 non_semaphores = [agent for agent in agents_in_square if not isinstance(agent, Semaphore)]
-                if (len(non_semaphores) == 0): return OBSTACLE
+                if (len(non_semaphores) == 0): return SEMAPHORE
                 other_agent_in_square = non_semaphores[0]
                 if (other_agent_in_square is Front): return FRONT
                 if (other_agent_in_square is Right): return RIGHT
                 if (other_agent_in_square is Back): return BACK
                 if (other_agent_in_square is Left): return LEFT
-                return OBSTACLE
+                return SEMAPHORE
             return square
         
         # Out of bounds square requested
         return None
+
+    def get_direction_open_for_semaphore(self, position):
+        agents = self.get_agent(position[0], position[1])
+        semaphore = [agent for agent in agents if isinstance(agent, Semaphore)][0]
+        return semaphore.get_current_direction()
 
     def get_agent(self, r, c):
         if r >= 0 and r < self.rows and c >= 0 and c < self.columns:
