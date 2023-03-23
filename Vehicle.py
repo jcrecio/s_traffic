@@ -1,5 +1,5 @@
 """ In this model, the vehicles move like in a normal road, left, front or right, as long as those
-    directions are accessible.
+    directions are accessible. (Vehicle cannot move backards)
 """
 
 import mesa
@@ -54,7 +54,9 @@ class Vehicle(mesa.Agent):
         # Random color used in representation
         self.color = self.get_random_color()
 
-    """ It returns the orthogonal directions for a given one. """
+    """ It returns the orthogonal directions for a given direction 
+        Example: ↑ has as orthogonal directions (←,→)
+    """
     def get_orthogonal_directions(self, direction, position):
         possible_orthogonal_directions = []
 
@@ -69,11 +71,10 @@ class Vehicle(mesa.Agent):
         self.townhall.move_agent(position, self)
 
     """ It gets the available directions for the vehicle in the current position 
-        They can be the leading front direction plus the lateral ones if they are active and accessible
+        They can be the leading front direction plus the orthogonal ones if they are active and accessible
         For instance, if a vehicle is a square that goes LEFT, posible directions are UP and DOWN as long as they are
         active and accessible, this is: LEFT square contains 'LEFT' direction and it does not have a vehicle or obstacle.
     """
-    
     def get_legal_available_directions(self):
         current_direction = self.townhall.get_square(self.position[0], self.position[1])
         if (current_direction == SEMAPHORE):
@@ -98,6 +99,11 @@ class Vehicle(mesa.Agent):
 
         return available_directions
 
+    """ This method gets posible directions (they are not occupied by other vehicles or obstacles) but are not 
+        legally usable (in terms of the direction defined in the square). This is only used when a vehicle is 'trapped'
+        but there is still space usable -> this makes the grid restrictions not being that strong (like easily
+        gets in infinite loops) and gain flexibility
+    """
     def get_illegal_available_directions(self):
         current_direction = self.townhall.get_square(self.position[0], self.position[1])
         if (current_direction == SEMAPHORE):
@@ -162,7 +168,7 @@ class Vehicle(mesa.Agent):
                    
            return
        
-       # From all posible directions, filter out the ones that are not feasible now
+       # From all posible directions, filter out the ones that are not accessible now
        accesible_directions = self.get_accesible_directions(possible_directions_to_move) 
 
        # Choose a random accessible direction and move there
@@ -188,6 +194,7 @@ class Vehicle(mesa.Agent):
     def get_color(self):
         return self.color
     
+    """ This is to give random colors to agents in the grid representation """
     def get_random_color(self):
         color = "".join([random.choice("0123456789abcdef") for _ in range(6)])
         return "#" + color

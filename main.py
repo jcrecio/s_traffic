@@ -3,15 +3,15 @@ Author: Juan Carlos Recio Abad
 Date: Match 23rd of 2023
 
 Traffic simulation for subject "Sistemas Multiagente" of Universitary course
-"Máster en ingeniería del software e inteligencia artificial"
+"Master en ingeniería del software e inteligencia artificial"
 '''
+
 import mesa
 
 from Semaphore import Semaphore
 from TrafficModel import TrafficModel
 from Vehicle import Vehicle
 from Directions import Back, EntryPoint, Front, Left, Right, Obstacle
-
 
 def agent_portrayal(agent):
     portrayal = {
@@ -87,12 +87,6 @@ def agent_portrayal(agent):
         portrayal["heading_y"] = -1
     return portrayal
 
-# rows = 15
-# columns = 15
-# grid = mesa.visualization.CanvasGrid(agent_portrayal, rows, columns, 600, 600)
-# server = mesa.visualization.ModularServer(
-#     TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 3600, "ratio_obstacles": 0.2, "ratio_vehicles": 0.1, "wait_before_remove": 10, "seed": 30}
-# )
 rows = 20
 columns = 20
 grid = mesa.visualization.CanvasGrid(agent_portrayal, rows, columns, 600, 600)
