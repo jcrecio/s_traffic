@@ -100,6 +100,9 @@ class Vehicle(mesa.Agent):
 
     def get_illegal_available_directions(self):
         current_direction = self.townhall.get_square(self.position[0], self.position[1])
+        if (current_direction == SEMAPHORE):
+            current_direction = self.townhall.get_direction_open_for_semaphore(self.position)
+
         possible_directions = self.get_orthogonal_directions(current_direction, self.position)
         
         coordinates_current_direction = map_direction_coordinates[current_direction]
