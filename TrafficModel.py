@@ -44,16 +44,13 @@ class TrafficModel(mesa.Model):
         self.init()
 
     def init(self):
-        # Agent intermediary which is used by vehicles as a 'GPS' to know how to move
+        # Agent intermediary which is used by vehicles as a 'GPS' or 'discovery service' to know how to move
+        # and talk to semaphores
         self.townhall = Townhall(uuid.uuid4(), self)
 
-        # Squares can be empty and have a direction (0,1,2,3) or can be obstacles (-1) or semaphores (-2)
         self.squares = np.zeros((self.rows, self.columns))
-
-        # Mesa grid with the agents
         self.grid = mesa.space.MultiGrid(self.rows, self.columns, False)
 
-        # Adds all the content
         self.add_squares()
         self.add_semaphores()
         self.remove_opposite_directions()
@@ -61,7 +58,7 @@ class TrafficModel(mesa.Model):
         self.generate_entry_point()
         self.add_vehicles()
 
-    # Adds a specific object into a square, like a direction as FRONT, BACK, etc or an OBSTACLE
+    # Adds a specific object into a square, like a direction as FRONT, BACK, etc. or an OBSTACLE
     def add_square(self, position, object):
         self.schedule.add(object)
         self.grid.place_agent(object, position) 
@@ -87,28 +84,24 @@ class TrafficModel(mesa.Model):
             self.grid.remove_agent(agent)
             self.schedule.remove(agent)
 
-    """ Adds all the squares in the grid, meaning it creates all the directions and obstacles in the grid 
-    """
+    """ Adds all the squares in the grid, meaning it creates all the directions and obstacles in the grid """
     def add_squares(self):
         for i in range(self.rows):
             for j in range(self.columns):
                 if (random.random() < self.ratio_obstacles):
-                    # Add an obstacle
                     self.squares[i, j] = OBSTACLE
                     self.add_square((i, j), Obstacle(uuid.uuid4(), self))
                 else:
-                    # Add a direction
                     self.add_direction_in_square(i, j)
-    """
-    Adds semaphores in all the squares of the grid that have intersections
-    Besides, if any square have all directions flowing in, it modifies randomly one to avoid close loops
-    """
+
+    """ Adds semaphores in all the squares of the grid that have intersections
+        Besides, if any square have all directions flowing in, it modifies randomly one to avoid close loops """
     def add_semaphores(self):
         for i in range(1, self.rows - 2):
             for j in range(1, self.columns - 2):
                 if (self.squares[i, j] == OBSTACLE): continue
 
-                # Inward stores how many directions flow in the square
+                # Inward variable stores how many directions flow in the square
                 inward = 0
                 directions = list()
                 if (self.squares[i, j-1] == BACK): 
@@ -146,7 +139,7 @@ class TrafficModel(mesa.Model):
         Removing some might bring others to be opposite, the intent is to minimize the opposites as much as possible
     """
     def remove_opposite_directions(self):
-        for remove_iteration in range(10):
+        for _ in range(10):
             for i in range(self.rows):
                 for j in range(self.columns):
                     current_direction = self.get_square(i, j)
@@ -157,6 +150,7 @@ class TrafficModel(mesa.Model):
                         self.remove_square_content(i, j)
                         self.add_direction_in_square(i, j, pointing_square_direction)
 
+    """ It tries to make all the edge squares to point inside the grid and not outside to avoid useless paths """
     def point_edges_to_inside(self):
         for c in range(self.rows):
             if (self.get_square(0, c) == 0): 
@@ -212,9 +206,8 @@ class TrafficModel(mesa.Model):
         ep = EntryPoint(uuid.uuid4(), self)
         self.schedule.add(ep)
         self.grid.place_agent(ep, (self.entry_point[0], self.entry_point[1]))
-    """
-    Adds a vehicle with a specific ID
-    """
+
+    """ Adds a vehicle with a specific ID """
     def add_vehicle(self, i):
         a = Vehicle(i, self.entry_point, self.townhall)
         self.schedule.add(a)
@@ -290,6 +283,6 @@ class TrafficModel(mesa.Model):
         self.schedule.remove(agent_to_remove)
         self.grid.remove_agent(agent_to_remove)
 
-        # Puts a new car in the grid
+        # Puts a new vehicle in the grid
         vehicle = self.add_vehicle(uuid.uuid4())
         self.vehicle_list.append(vehicle)
