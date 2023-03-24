@@ -14,6 +14,7 @@ Para preparar el entorno:
 
 Para ejecutar el sistema tan solo hace falta ejecutar el comando:
 > main.py <parámetros de entrada>
+
 y los parámetros son:
 - rows = nº de rows del grid
 - columns = nº de columnas del grid
@@ -24,8 +25,9 @@ y los parámetros son:
 - seed = seed para la reproducción de la simulación, ej: 1111
 - display = 1 para mostrar gráficamente, 0 para no
 
-Ejemplo: main.py 20 20 3600 0.15 0.2 10 1113 1
-(20 rows, 20 columnas, 3600s de duración, 15% de obstáculos, 20% de vehículos, 10 s antes de aparcar, seed de 1113 y mostrar gráficamente)
+Ejemplo: `main.py 20 20 3600 0.15 0.2 10 1113 0`
+
+(20 rows, 20 columnas, 3600s de duración, 15% de obstáculos, 20% de vehículos, 10 s antes de aparcar, seed de 1113 y no mostrar gráficamente)
 o también se puede usar el fichero adjunto launch.json para ejecutar con vscode y depurar el código
 
 Explicación de la simulación.

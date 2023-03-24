@@ -54,6 +54,8 @@ class Vehicle(mesa.Agent):
         # Random color used in representation
         self.color = self.get_random_color()
 
+        self.parked = False
+
     """ It returns the orthogonal directions for a given direction 
         Example: ↑ has as orthogonal directions (←,→)
     """
@@ -158,6 +160,7 @@ class Vehicle(mesa.Agent):
            if (len(possible_illegal_directions_to_move) == 0 and 
                self.wait_for_park > self.townhall.get_time_allowed_stopped()):
                 self.townhall.park_vehicle(self.position)
+                self.parked = True
            else:
                accesible_directions = self.get_accesible_directions(possible_illegal_directions_to_move)
                if (len(accesible_directions) > 0):
@@ -198,3 +201,6 @@ class Vehicle(mesa.Agent):
     def get_random_color(self):
         color = "".join([random.choice("0123456789abcdef") for _ in range(6)])
         return "#" + color
+    
+    def is_parked(self):
+        return self.parked

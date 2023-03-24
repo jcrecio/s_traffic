@@ -226,6 +226,7 @@ class TrafficModel(mesa.Model):
             self.running = False
             self.show_summary()
         self.schedule.step()
+        self.show_current_status(self.schedule.steps)
 
     def show_summary(self):
         self.total_waiting_semaphores = 0
@@ -243,6 +244,13 @@ class TrafficModel(mesa.Model):
         print("Accumulated time waiting for vehicles: " + str(self.total_waiting_vehicles))
         print("Average time waiting for semaphores: " + str(self.total_waiting_semaphores / len(self.vehicle_list)))
         print("Average time waiting for vehicles: " + str(self.total_waiting_vehicles  / len(self.vehicle_list)))
+
+    def show_current_status(self, current_step):
+        if (current_step % 75 != 0): return
+        print()
+        print('---------------------- Status ')
+        print('Active vehicles: ' + str(len([vehicle for vehicle in self.vehicle_list if vehicle.is_parked() == False])))
+        print('Parked vehicles: ' + str(len([vehicle for vehicle in self.vehicle_list if vehicle.is_parked() == True])))
 
     def get_square(self, r, c):
         if r >= 0 and r < self.rows and c >= 0 and c < self.columns:

@@ -32,7 +32,7 @@ if (display == 1): # with graphical display
 else: # without graphical display
     traffic_model = TrafficModel(rows, columns, duration, ratio_obstacles, ratio_vehicles, wait_before_remove, seed)
     for i in range(duration):
-        print('Running step ' + str(i))
+        if (i % 75 == 0): print('Running step ' + str(i))
         traffic_model.step()
     
     traffic_model.show_summary()
