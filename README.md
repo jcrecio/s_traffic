@@ -3,7 +3,8 @@
 
 Alumno: Juan Carlos Recio Abad
 
-Todo el código, documentación y comentarios están en inglés para que puedan publicarse y sea accesible a más gente después de su uso en la asignatura siempre y cuando el profesor de permiso.
+Todo el código, documentación y comentarios están en inglés ya que lo tengo en mi repositorio de github.
+Link con todo el histórico: https://github.com/jcrecio/s_traffic
 
 Las clases, métodos y en general todo el código intentan ser autoexplicativos de lo que se hace.
 
@@ -23,7 +24,8 @@ y los parámetros son:
 - seed = seed para la reproducción de la simulación, ej: 1111
 - display = 1 para mostrar gráficamente, 0 para no
 
-Ejemplo: main.py 20 20 3600 0.15 0.2 10 1113 0
+Ejemplo: main.py 20 20 3600 0.15 0.2 10 1113 1
+(20 rows, 20 columnas, 3600s de duración, 15% de obstáculos, 20% de vehículos, 10 s antes de aparcar, seed de 1113 y mostrar gráficamente)
 o también se puede usar el fichero adjunto launch.json para ejecutar con vscode y depurar el código
 
 Explicación de la simulación.
