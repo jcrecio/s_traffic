@@ -8,9 +8,10 @@
             "name": "Python: archivo actual",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "main.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "args": ["20", "20", "360", "0.15", "0.2", "10", "1113", "1"]
         }
     ]
 }

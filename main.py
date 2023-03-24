@@ -6,94 +6,33 @@ Traffic simulation for subject "Sistemas Multiagente" of Universitary course
 "Master en ingeniería del software e inteligencia artificial"
 '''
 
+import sys
 import mesa
-
-from Semaphore import Semaphore
+from Drawing import agent_portrayal
 from TrafficModel import TrafficModel
-from Vehicle import Vehicle
-from Directions import Back, EntryPoint, Front, Left, Right, Obstacle
 
-def agent_portrayal(agent):
-    portrayal = {
-        "Shape": "circle",
-        "Color": "red",
-        "Filled": "true",
-        "Layer": 0,
-        "r": 0.5,
-    }
+rows = int(sys.argv[1])
+columns = int(sys.argv[2])
+duration = int(sys.argv[3])
+ratio_obstacles = float(sys.argv[4])
+ratio_vehicles = float(sys.argv[5])
+wait_before_remove = int(sys.argv[6])
+seed = int(sys.argv[7])
+display = int(sys.argv[8])
 
-    if (type(agent) is Vehicle):
-        portrayal["Color"] = agent.get_color()
-        portrayal["Layer"] = 0
-        portrayal["r"] = 0.3
-        return portrayal
-    elif (type(agent) is Semaphore):
-        portrayal = {
-                "Shape": "arrowHead",
-                "scale": 0.55,
-                "Color": "green",
-                "Filled": "false",
-                "Layer": 0,
-                "arrowhead_shape": {"width": 15, "height": 10}
-        }
-        if (agent.current_direction == 0): 
-            portrayal["heading_x"] = -1
-            portrayal["heading_y"] = 0
-        elif (agent.current_direction == 2): 
-            portrayal["heading_x"] = 1
-            portrayal["heading_y"] = 0
-        elif (agent.current_direction == 1): 
-            portrayal["heading_x"] = 0
-            portrayal["heading_y"] = 1
-        elif (agent.current_direction == 3): 
-            portrayal["heading_x"] = 0
-            portrayal["heading_y"] = -1
-        return portrayal
-    elif (type(agent) is Obstacle):
-        portrayal["Shape"] = "rect"
-        portrayal["Filled"] = "true"
-        portrayal["Color"] = "black"
-        portrayal["Layer"] = 0
-        portrayal["w"] = 1
-        portrayal["h"] = 1
-        return portrayal
-    elif (type(agent) is EntryPoint):
-        portrayal["Shape"] = "rect"
-        portrayal["Filled"] = "true"
-        portrayal["Color"] = "red"
-        portrayal["Layer"] = 0
-        portrayal["w"] = 0.9
-        portrayal["h"] = 0.9
-        return portrayal
+if (display == 1): # with graphical display
+    grids = [mesa.visualization.CanvasGrid(agent_portrayal, rows, columns, 600, 600)]
+    server = mesa.visualization.ModularServer(
+    TrafficModel, grids, "Traffic model", {"rows": rows, "columns": columns, "duration": duration,
+                                             "ratio_obstacles": ratio_obstacles, "ratio_vehicles": ratio_vehicles, 
+                                             "wait_before_remove": wait_before_remove, "seed": seed}
+    )
+    server.port = 8521
+    server.launch()
+else: # without graphical display
+    traffic_model = TrafficModel(rows, columns, duration, ratio_obstacles, ratio_vehicles, wait_before_remove, seed)
+    for i in range(duration):
+        print('Running step ' + str(i))
+        traffic_model.step()
     
-    portrayal = {
-            "Shape": "arrowHead",
-            "scale": 0.5,
-            "Color": "purple",
-            "Filled": "false",
-            "Layer": 0,
-        }
-    if (type(agent) is Front): 
-        portrayal["heading_x"] = -1
-        portrayal["heading_y"] = 0
-    elif (type(agent) is Back): 
-        portrayal["heading_x"] = 1
-        portrayal["heading_y"] = 0
-    elif (type(agent) is Right): 
-        portrayal["heading_x"] = 0
-        portrayal["heading_y"] = 1
-    elif (type(agent) is Left): 
-        portrayal["heading_x"] = 0
-        portrayal["heading_y"] = -1
-    return portrayal
-
-rows = 20
-columns = 20
-grid = mesa.visualization.CanvasGrid(agent_portrayal, rows, columns, 600, 600)
-server = mesa.visualization.ModularServer(
-    TrafficModel, [grid], "Traffic model", {"rows": rows, "columns": columns, "duration": 300,
-                                             "ratio_obstacles": 1/9, "ratio_vehicles": 1/25, "wait_before_remove": 10, 
-                                             "seed": 12}
-)
-server.port = 8521  # The default
-server.launch()
+    traffic_model.show_summary()

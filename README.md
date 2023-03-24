@@ -9,10 +9,22 @@ Las clases, métodos y en general todo el código intentan ser autoexplicativos 
 
 Para preparar el entorno:
 1. Crear entorno virtual con venv
-2. Instalar las dependencias en el entorno: python install -r requirements.txt
+2. Instalar las dependencias en el entorno: pip install -r requirements.txt
 
 Para ejecutar el sistema tan solo hace falta ejecutar el comando:
 > main.py <parámetros de entrada>
+y los parámetros son:
+- rows = nº de rows del grid
+- columns = nº de columnas del grid
+- duration = duración en segundos (tiempos de mesa framework)
+- ratio_obstacles = float, ratio de obstaculos con respecto del total de casillas, ej: 0.15
+- ratio_vehicles = float, ratio de vehículos con respecto del total de casillas, ej 0.2
+- wait_before_remove = segundos que tarda en aparcar (eliminarse) un vehículo que no puede moverse más
+- seed = seed para la reproducción de la simulación, ej: 1111
+- display = 1 para mostrar gráficamente, 0 para no
+
+Ejemplo: main.py 20 20 3600 0.15 0.2 10 1113 0
+o también se puede usar el fichero adjunto launch.json para ejecutar con vscode y depurar el código
 
 Explicación de la simulación.
 
@@ -43,3 +55,14 @@ Agentes vehículo:
 Agentes semáforo:
 - Se sitúan en los cruces, cada X segundos cambian la dirección en la que admiten la circulación.
   Cada semáforo va a su propio ritmo. Admiten las direcciones que generaron el cruce.
+
+### Representación gráfica
+- Agentes se muestran como bolitas de colores
+- Semáforos se muestran como flechas verdes que apuntarán cada vez a la dirección a la que permiten el acceso
+- Townhall no tiene representación
+
+- Agentes artificiales de representación: (he usado agentes porque usar javascript era bastante enrevesado solo para eso
+  y quería dedicar tiempo al proyecto como tal y no con javascript y pintar gráficos.)
+    - Casillas normales muestran una flecha con la dirección del tráfico
+    - Obstáculos o casillas no transitables muestran un cuadrado negro
+    - Punto de entrada es rojo

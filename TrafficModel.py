@@ -224,18 +224,25 @@ class TrafficModel(mesa.Model):
     def step(self):
         if (self.schedule.steps > self.duration):
             self.running = False
-            self.total_waiting_semaphores = 0
-            self.total_waiting_vehicles = 0
-            for vehicle in self.vehicle_list:
-                print("Time waiting in semaphores by vehicle " + str(vehicle.unique_id) + " : " + str(vehicle.get_time_waiting_for_semaphores()))
-                print("Time waiting for other vehicles by vehicle " + str(vehicle.unique_id) + " : " + str(vehicle.get_time_waiting_for_vehicles()))
-                self.total_waiting_semaphores += vehicle.get_time_waiting_for_semaphores()
-                self.total_waiting_vehicles += vehicle.get_time_waiting_for_vehicles()
-            print("Accumulated time waiting for semaphores: " + str(self.total_waiting_semaphores))
-            print("Accumulated time waiting for vehicles: " + str(self.total_waiting_vehicles))
-            print("Average time waiting for semaphores: " + str(self.total_waiting_semaphores / len(self.vehicle_list)))
-            print("Average time waiting for vehicles: " + str(self.total_waiting_vehicles  / len(self.vehicle_list)))
+            self.show_summary()
         self.schedule.step()
+
+    def show_summary(self):
+        self.total_waiting_semaphores = 0
+        self.total_waiting_vehicles = 0
+        for vehicle in self.vehicle_list:
+            print()
+            print('---------------------- Vehicle number ' + str(vehicle.unique_id))
+            print("Time waiting in semaphores by vehicle " + str(vehicle.unique_id) + " : " + str(vehicle.get_time_waiting_for_semaphores()))
+            print("Time waiting for other vehicles by vehicle " + str(vehicle.unique_id) + " : " + str(vehicle.get_time_waiting_for_vehicles()))
+            self.total_waiting_semaphores += vehicle.get_time_waiting_for_semaphores()
+            self.total_waiting_vehicles += vehicle.get_time_waiting_for_vehicles()
+        print()
+        print()
+        print("Accumulated time waiting for semaphores: " + str(self.total_waiting_semaphores))
+        print("Accumulated time waiting for vehicles: " + str(self.total_waiting_vehicles))
+        print("Average time waiting for semaphores: " + str(self.total_waiting_semaphores / len(self.vehicle_list)))
+        print("Average time waiting for vehicles: " + str(self.total_waiting_vehicles  / len(self.vehicle_list)))
 
     def get_square(self, r, c):
         if r >= 0 and r < self.rows and c >= 0 and c < self.columns:
