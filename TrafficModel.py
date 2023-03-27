@@ -2,29 +2,12 @@ import uuid
 import mesa
 import random
 import numpy as np
-from Constants import BACK, LEFT, OBSTACLE, RIGHT, SEMAPHORE, FRONT
+from Constants import *
+from Utils import *
 from Directions import Back, EntryPoint, Front, Left, Right, Obstacle
 from Semaphore import Semaphore
 from Townhall import Townhall
 from Vehicle import Vehicle
-
-""" It returns the coordinates of a given direction.
-    Example: FRONT -> -1,0
-             LEFT  -> 0,-1
-"""
-map_direction_coordinates = {
-    0: [-1,0],
-    1: [0, 1],
-    2: [1, 0],
-    3: [0, -1]
-}
-
-opposite_directions = {
-    LEFT: RIGHT,
-    RIGHT: LEFT,
-    FRONT: BACK,
-    BACK: FRONT
-}
 
 """ Model for traffic simulation """
 class TrafficModel(mesa.Model):
@@ -41,6 +24,9 @@ class TrafficModel(mesa.Model):
         random.seed(seed)
         self.total_wait_vehicles = 0
         
+        self.previous_square = None
+        self.chance_change_previous = 0.3
+        
         self.init()
 
     def init(self):
@@ -54,7 +40,7 @@ class TrafficModel(mesa.Model):
         self.add_squares()
         self.add_semaphores()
         self.remove_opposite_directions()
-        self.point_edges_to_inside()
+        # self.point_edges_to_inside()
         self.generate_entry_point()
         self.add_vehicles()
 
@@ -65,7 +51,16 @@ class TrafficModel(mesa.Model):
 
     def add_direction_in_square(self, i, j, forbidden_direction = None):
         if (forbidden_direction == None):
-            self.squares[i, j] = random.randrange(4)
+            if (self.previous_square == None): self.squares[i, j] = random.randrange(4)
+            else:
+                if (random.random() < self.chance_change_previous):
+                    # Generates a new direction orthogonal to avoid blocking paths
+                    directions = [*range(4)]
+                    directions.remove(opposite_directions[int(self.previous_square)])
+                    self.squares[i, j] = random.randrange(4)
+                else:
+                    # Maintains the current direction
+                    self.squares[i, j] = self.previous_square
         else:
             match forbidden_direction:
                 case 0: self.squares[i, j] = random.choice([1,2,3])
@@ -78,6 +73,8 @@ class TrafficModel(mesa.Model):
         elif (self.squares[i, j] == BACK): self.add_square((i, j), Back(uuid.uuid4(), self))  
         elif (self.squares[i, j] == LEFT): self.add_square((i, j), Left(uuid.uuid4(), self)) 
             
+        if self.previous_square == None: self.previous_square = self.squares[i, j]
+
     def remove_square_content(self, i, j):
         content = self.get_agent(i, j)
         for agent in content:
@@ -85,14 +82,14 @@ class TrafficModel(mesa.Model):
             self.schedule.remove(agent)
 
     """ Adds all the squares in the grid, meaning it creates all the directions and obstacles in the grid """
-    def add_squares(self):
+    def add_squares(self):        
         for i in range(self.rows):
             for j in range(self.columns):
                 if (random.random() < self.ratio_obstacles):
                     self.squares[i, j] = OBSTACLE
                     self.add_square((i, j), Obstacle(uuid.uuid4(), self))
                 else:
-                    self.add_direction_in_square(i, j)
+                    self.add_direction_in_square(i, j, forbidden_direction=None)
 
     """ Adds semaphores in all the squares of the grid that have intersections
         Besides, if any square have all directions flowing in, it modifies randomly one to avoid close loops """
@@ -139,7 +136,7 @@ class TrafficModel(mesa.Model):
         Removing some might bring others to be opposite, the intent is to minimize the opposites as much as possible
     """
     def remove_opposite_directions(self):
-        for _ in range(10):
+        # for _ in range(10):
             for i in range(self.rows):
                 for j in range(self.columns):
                     current_direction = self.get_square(i, j)

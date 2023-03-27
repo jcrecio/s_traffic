@@ -4,37 +4,10 @@
 
 import mesa
 import random
-from Constants import BACK, LEFT, OBSTACLE, RIGHT, SEMAPHORE, FRONT
+
 from Semaphore import Semaphore
-
-""" This is used to obtain the orthogonal directions for a given direction.
-    Examples: FRONT -> orthogonals are [LEFT, RIGHT]
-              RIGHT -> orthogonals are [FRONT, DOWN]
-"""
-orthogonal_directions = {
-    0: [[0,-1, LEFT],[0,1, RIGHT]], # ↑: (←,→)
-    1: [[-1,0, FRONT],[1,0, BACK]], # →: (↑,↓)
-    2: [[0,1, RIGHT],[0,-1, LEFT]], # ↓: (←,→)
-    3: [[-1,0, FRONT],[1,0, BACK]]  # ←: (↑,↓)
-}
-
-""" It returns the coordinates of a given direction.
-    Example: FRONT -> -1,0
-             LEFT  -> 0,-1
-"""
-map_direction_coordinates = {
-    0: [-1,0],
-    1: [0, 1],
-    2: [1, 0],
-    3: [0, -1]
-}
-
-opposite_directions = {
-    LEFT: RIGHT,
-    RIGHT: LEFT,
-    FRONT: BACK,
-    BACK: FRONT
-}
+from Utils import *
+from Constants import *
 
 class Vehicle(mesa.Agent):
     def __init__(self, unique_id, position, townhall) -> None:
@@ -48,13 +21,15 @@ class Vehicle(mesa.Agent):
         # time waiting in semaphores
         self.time_waiting_for_semaphores = 0
 
-        # wait_for_park is used to determine if a car cannot longer move so it is parked
+        # wait_for_park is used to determine if a car cannot longer move so it has to park
         self.wait_for_park = 0
+
+        # is the vehicle parked?
+        self.parked = False
 
         # Random color used in representation
         self.color = self.get_random_color()
 
-        self.parked = False
 
     """ It returns the orthogonal directions for a given direction 
         Example: ↑ has as orthogonal directions (←,→)
@@ -68,9 +43,11 @@ class Vehicle(mesa.Agent):
             
         return possible_orthogonal_directions
           
+    """ The agent moves to the indicated position """
     def move(self, position):
         self.position = position
         self.townhall.move_agent(position, self)
+
 
     """ It gets the available directions for the vehicle in the current position 
         They can be the leading front direction plus the orthogonal ones if they are active and accessible
@@ -81,6 +58,7 @@ class Vehicle(mesa.Agent):
         current_direction = self.townhall.get_square(self.position[0], self.position[1])
         if (current_direction == SEMAPHORE):
             current_direction = self.townhall.get_direction_open_for_semaphore(self.position)
+        
         possible_directions = self.get_orthogonal_directions(current_direction, self.position)
         
         coordinates_current_direction = map_direction_coordinates[current_direction]
@@ -153,10 +131,11 @@ class Vehicle(mesa.Agent):
     def step(self):
        possible_directions_to_move = self.get_legal_available_directions()
 
-       # If no possible direction to move:
+       # If no possible directions to move, start counting to park:
        if ((possible_directions_to_move == None or len(possible_directions_to_move) == 0)): 
            self.wait_for_park += 1
            possible_illegal_directions_to_move = self.get_illegal_available_directions()
+
            if (len(possible_illegal_directions_to_move) == 0 and 
                self.wait_for_park > self.townhall.get_time_allowed_stopped()):
                 self.townhall.park_vehicle(self.position)
