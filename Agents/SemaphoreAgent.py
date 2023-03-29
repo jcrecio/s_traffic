@@ -3,7 +3,7 @@ import random
 
 from Constants import BACK, LEFT, RIGHT, FRONT
 
-class Semaphore(mesa.Agent):
+class SemaphoreAgent(mesa.Agent):
     def __init__(self, unique_id, position, directions, model) -> None:
         super().__init__(unique_id, model)
         self.position = position
@@ -13,7 +13,8 @@ class Semaphore(mesa.Agent):
         self.time_each_direction = random.randint(4, 12)
         self.timer = self.time_each_direction
 
-        self.current_direction = random.randrange(len(directions))
+        self.current_direction_index = random.randrange(len(directions))
+        self.current_direction = directions[self.current_direction_index]
 
     def step(self):
         if self.timer == 0:
@@ -23,7 +24,10 @@ class Semaphore(mesa.Agent):
             self.timer -= 1
 
     def next_direction(self):
-        self.current_direction = self.directions[(self.current_direction + 1) % len(self.directions)]
+        self.current_direction_index = self.current_direction_index + 1
+        if (self.current_direction_index == len(self.directions)): self.current_direction_index = 0
+    
+        self.current_direction = self.directions[self.current_direction_index]
     
     """ Vehicles talks to semaphores that are adjacent (the discovery happens with townhall agent)
     to check if it is green/open on the incoming direction 

@@ -57,18 +57,19 @@ Agentes vehículo:
 - Se mueven 1 casilla por tiempo/segundo. Siguen la dirección especificada por las casillas.
 - En detalle, se moverán por la casilla dictada por la casilla actual, o por las casillas laterales/ortogonales
   si tienen definido el movimiento en esa dirección (como en una carretera normal con sus cruces izq y dcho.)
-- Si se encuentran bloqueados sin espacio durante X segundos, se considera que aparcan y se introducen un nuevo vehículo
+- Si se encuentran bloqueados sin espacio durante X segundos, se considera que aparcan y se introduce un nuevo vehículo
   al sistema.
 - Si se encuentran bloqueados pero con espacio libre que puedan tomar, realizan una "infracción" y se van por otro lado. 
   Esto permite que las reglas estrictas de la simulación no dejen el sistema bloqueado fácilmente.
 
 Agentes semáforo:
 - Se sitúan en los cruces, cada X segundos cambian la dirección en la que admiten la circulación.
-  Cada semáforo va a su propio ritmo. Admiten las direcciones que generaron el cruce.
+  Cada semáforo va a su propio ritmo (uno puede cambiar hacia donde está en verde cada 5 segundos mientras que otro puede hacerlo cada 8s). Admiten solo las direcciones que generaron el cruce para ponerse en verde.
 
 ## 4. Resultados
-Cuando la simulación acabe mostrará el tiempo consumido por cada vehículo esperando por otros vehículos o esperando por semáforos.
+Cuando la simulación acabe mostrará el tiempo consumido por cada vehículo esperando por otros vehículos y esperando por semáforos.
 También se mostrará la media y el total de tiempo acumulado.
+Aparte se mostrará cuales son las posiciones del sistema por las cuales los vehículo aparcaron al no poder desplazarse más.
 
 ## 5. Representación gráfica
 - Agentes se muestran como bolitas de colores

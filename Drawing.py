@@ -1,5 +1,5 @@
-from Semaphore import Semaphore
-from Vehicle import Vehicle
+from Agents.SemaphoreAgent import SemaphoreAgent
+from Agents.VehicleAgent import VehicleAgent
 from Directions import Back, EntryPoint, Front, Left, Right, Obstacle
 
 def agent_portrayal(agent):
@@ -11,12 +11,12 @@ def agent_portrayal(agent):
         "r": 0.5,
     }
 
-    if (type(agent) is Vehicle):
+    if (type(agent) is VehicleAgent):
         portrayal["Color"] = agent.get_color()
         portrayal["Layer"] = 0
         portrayal["r"] = 0.3
         return portrayal
-    elif (type(agent) is Semaphore):
+    elif (type(agent) is SemaphoreAgent):
         portrayal = {
                 "Shape": "arrowHead",
                 "scale": 0.55,

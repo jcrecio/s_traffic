@@ -5,11 +5,11 @@
 import mesa
 import random
 
-from Semaphore import Semaphore
+from Agents.SemaphoreAgent import SemaphoreAgent
 from Utils import *
 from Constants import *
 
-class Vehicle(mesa.Agent):
+class VehicleAgent(mesa.Agent):
     def __init__(self, unique_id, position, townhall) -> None:
         super().__init__(unique_id, townhall)
         self.position = position
@@ -114,7 +114,7 @@ class Vehicle(mesa.Agent):
             if agents_next_square == None or len(agents_next_square) == 0: continue
             
             content_next_square = self.townhall.get_square(possible_direction[0], possible_direction[1])
-            semaphore_in_square = [agent for agent in agents_next_square if type(agent) is Semaphore]
+            semaphore_in_square = [agent for agent in agents_next_square if type(agent) is SemaphoreAgent]
             if (len(semaphore_in_square) > 0 or content_next_square == SEMAPHORE):
                 is_open_direction = semaphore_in_square[0].is_open_direction(self.position)
                 if is_open_direction:
@@ -122,7 +122,7 @@ class Vehicle(mesa.Agent):
                     continue
                 else: continue
             else: 
-                vehicle_in_square = [agent for agent in agents_next_square if type(agent) is Vehicle]
+                vehicle_in_square = [agent for agent in agents_next_square if type(agent) is VehicleAgent]
                 if (len(vehicle_in_square) == 0 and \
                     self.townhall.get_square(possible_direction[0], possible_direction[1]) != OBSTACLE):
                     accessible_directions.append(possible_direction)
@@ -161,7 +161,7 @@ class Vehicle(mesa.Agent):
            direction_chosen = possible_directions_to_move[self.random.randrange(len(possible_directions_to_move))]
            agents_next_square = self.townhall.get_agent_on_square(direction_chosen[0], direction_chosen[1])
            content_next_square = self.townhall.get_square(direction_chosen[0], direction_chosen[1])
-           semaphore_in_square = [agent for agent in agents_next_square if type(agent) is Semaphore]
+           semaphore_in_square = [agent for agent in agents_next_square if type(agent) is SemaphoreAgent]
            if (len(semaphore_in_square) > 0 or content_next_square == SEMAPHORE):
                 self.time_waiting_for_semaphores += 1
            else:

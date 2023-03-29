@@ -5,9 +5,9 @@ import numpy as np
 from Constants import *
 from Utils import *
 from Directions import Back, EntryPoint, Front, Left, Right, Obstacle
-from Semaphore import Semaphore
-from Townhall import Townhall
-from Vehicle import Vehicle
+from Agents.SemaphoreAgent import SemaphoreAgent
+from Agents.TownhallAgent import TownhallAgent
+from Agents.VehicleAgent import VehicleAgent
 
 """ Model for traffic simulation """
 class TrafficModel(mesa.Model):
@@ -33,7 +33,7 @@ class TrafficModel(mesa.Model):
     def init(self):
         # Agent intermediary which is used by vehicles as a 'GPS' or 'discovery service' to know how to move
         # and talk to semaphores
-        self.townhall = Townhall(uuid.uuid4(), self)
+        self.townhall = TownhallAgent(uuid.uuid4(), self)
 
         self.squares = np.zeros((self.rows, self.columns))
         self.grid = mesa.space.MultiGrid(self.rows, self.columns, False)
@@ -127,7 +127,7 @@ class TrafficModel(mesa.Model):
                 # there is intersection, add semaphore
                 if (inward > 1):
                     self.remove_square_content(i, j)
-                    s = Semaphore(uuid.uuid4(), [i,j], directions, self)
+                    s = SemaphoreAgent(uuid.uuid4(), [i,j], directions, self)
                     self.schedule.add(s)
                     self.grid.place_agent(s, (i, j))
                     self.squares[i, j] = SEMAPHORE
@@ -191,7 +191,7 @@ class TrafficModel(mesa.Model):
 
     """ Adds a vehicle with a specific ID """
     def add_vehicle(self, i):
-        a = Vehicle(i, self.entry_point, self.townhall)
+        a = VehicleAgent(i, self.entry_point, self.townhall)
         self.schedule.add(a)
         self.grid.place_agent(a, (self.entry_point[0], self.entry_point[1]))
         return a
@@ -246,7 +246,7 @@ class TrafficModel(mesa.Model):
             square = self.squares[r, c]
             if (square == SEMAPHORE):
                 agents_in_square = self.grid.get_cell_list_contents([[r, c]])
-                non_semaphores = [agent for agent in agents_in_square if not isinstance(agent, Semaphore)]
+                non_semaphores = [agent for agent in agents_in_square if not isinstance(agent, SemaphoreAgent)]
                 if (len(non_semaphores) == 0): return SEMAPHORE
                 other_agent_in_square = non_semaphores[0]
                 if (other_agent_in_square is Front): return FRONT
@@ -261,7 +261,7 @@ class TrafficModel(mesa.Model):
 
     def get_direction_open_for_semaphore(self, position):
         agents = self.get_agent(position[0], position[1])
-        semaphore = [agent for agent in agents if isinstance(agent, Semaphore)][0]
+        semaphore = [agent for agent in agents if isinstance(agent, SemaphoreAgent)][0]
         return semaphore.get_current_direction()
 
     def get_agent(self, r, c):
@@ -287,7 +287,7 @@ class TrafficModel(mesa.Model):
             self.parking_spots[position_str] = True
 
         agents = self.get_agent(position[0], position[1])
-        agent_to_remove = [agent for agent in agents if type(agent) is Vehicle][0]
+        agent_to_remove = [agent for agent in agents if type(agent) is VehicleAgent][0]
         self.schedule.remove(agent_to_remove)
         self.grid.remove_agent(agent_to_remove)
 
