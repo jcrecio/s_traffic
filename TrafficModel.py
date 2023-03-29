@@ -19,6 +19,7 @@ class TrafficModel(mesa.Model):
         self.ratio_vehicles = ratio_vehicles
         self.vehicles = int((rows * columns) * ratio_vehicles)
         self.vehicle_list = list()
+        self.parking_spots = dict()
         self.wait_before_remove = wait_before_remove
         self.schedule = mesa.time.RandomActivation(self)
         random.seed(seed)
@@ -39,8 +40,7 @@ class TrafficModel(mesa.Model):
 
         self.add_squares()
         self.add_semaphores()
-        self.remove_opposite_directions()
-        # self.point_edges_to_inside()
+        self.point_edges_to_inside()
         self.generate_entry_point()
         self.add_vehicles()
 
@@ -132,21 +132,6 @@ class TrafficModel(mesa.Model):
                     self.grid.place_agent(s, (i, j))
                     self.squares[i, j] = SEMAPHORE
 
-    """ It tries to remove all the oppposite directions that defeat the purpose of moving
-        Removing some might bring others to be opposite, the intent is to minimize the opposites as much as possible
-    """
-    def remove_opposite_directions(self):
-        # for _ in range(10):
-            for i in range(self.rows):
-                for j in range(self.columns):
-                    current_direction = self.get_square(i, j)
-                    if (current_direction == None or current_direction < 0): continue
-                    current_direction_coordinates = map_direction_coordinates[current_direction]
-                    pointing_square_direction = self.get_square(i + current_direction_coordinates[0], j + current_direction_coordinates[1])
-                    if (opposite_directions[current_direction] == pointing_square_direction):
-                        self.remove_square_content(i, j)
-                        self.add_direction_in_square(i, j, pointing_square_direction)
-
     """ It tries to make all the edge squares to point inside the grid and not outside to avoid useless paths """
     def point_edges_to_inside(self):
         for c in range(self.rows):
@@ -237,10 +222,17 @@ class TrafficModel(mesa.Model):
             self.total_waiting_vehicles += vehicle.get_time_waiting_for_vehicles()
         print()
         print()
-        print("Accumulated time waiting for semaphores: " + str(self.total_waiting_semaphores))
-        print("Accumulated time waiting for vehicles: " + str(self.total_waiting_vehicles))
-        print("Average time waiting for semaphores: " + str(self.total_waiting_semaphores / len(self.vehicle_list)))
-        print("Average time waiting for vehicles: " + str(self.total_waiting_vehicles  / len(self.vehicle_list)))
+        print("Average time waiting for semaphores by a vehicle: " + str(self.total_waiting_semaphores / len(self.vehicle_list)))
+        print("Average time waiting for vehicles by a vehicle: " + str(self.total_waiting_vehicles  / len(self.vehicle_list)))
+        print()
+        print("Accumulated time waiting for semaphores by all vehicles: " + str(self.total_waiting_semaphores))
+        print("Accumulated time waiting for other vehicles: " + str(self.total_waiting_vehicles))
+        print()
+        print("Parking spots where vehicles parked during the simulation:")
+        parking_spots_to_print = list()
+        for p in self.parking_spots:
+            parking_spots_to_print.append(p)
+        print(parking_spots_to_print)
 
     def show_current_status(self, current_step):
         if (current_step % 75 != 0): return
@@ -290,11 +282,15 @@ class TrafficModel(mesa.Model):
 
     """ When a vehicle is going to park because it cannot longer move """
     def park_vehicle(self, position):
+        position_str = str(position[0])+","+str(position[1])
+        if (position_str in self.parking_spots) == False:
+            self.parking_spots[position_str] = True
+
         agents = self.get_agent(position[0], position[1])
         agent_to_remove = [agent for agent in agents if type(agent) is Vehicle][0]
         self.schedule.remove(agent_to_remove)
         self.grid.remove_agent(agent_to_remove)
 
         # Puts a new vehicle in the grid
-        vehicle = self.add_vehicle(uuid.uuid4())
+        vehicle = self.add_vehicle(str(len(self.vehicle_list)))
         self.vehicle_list.append(vehicle)

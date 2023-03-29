@@ -23,7 +23,7 @@ class Semaphore(mesa.Agent):
             self.timer -= 1
 
     def next_direction(self):
-        self.current_direction = (self.current_direction + 1) % len(self.directions)
+        self.current_direction = self.directions[(self.current_direction + 1) % len(self.directions)]
     
     """ Vehicles talks to semaphores that are adjacent (the discovery happens with townhall agent)
     to check if it is green/open on the incoming direction 
