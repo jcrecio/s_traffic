@@ -4,7 +4,6 @@
 Alumno: Juan Carlos Recio Abad
 
 Todo el código, documentación y comentarios están en inglés.
-Link con todo el histórico de commits: https://github.com/jcrecio/s_traffic
 
 Las clases, métodos y en general todo el código intentan ser autoexplicativos de lo que se hace.
 
