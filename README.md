@@ -80,3 +80,5 @@ Aparte se mostrará cuales son las posiciones del sistema por las cuales los veh
     - Casillas normales muestran una flecha con la dirección del tráfico
     - Obstáculos o casillas no transitables muestran un cuadrado negro
     - Punto de entrada es rojo
+## 6. Siguientes pasos:
+- Comunicación entre vehículos para optimizar rutas.
