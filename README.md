@@ -1,29 +1,20 @@
-# Práctica Sistemas Multiagente
-## Master universitario en ingeniería del software e inteligencia artificial
+## 1. Running the model
+To set up the environment:
+1. Create a virtual environment with venv.
+2. Install the dependencies in the environment using `pip install -r requirements.txt`.
 
-Alumno: Juan Carlos Recio Abad
+To run the system, simply execute the following command:
+> main.py <input parameters>
 
-Todo el código, documentación y comentarios están en inglés.
-
-Las clases, métodos y en general todo el código intentan ser autoexplicativos de lo que se hace.
-
-## 1. Ejecución del modelo
-Para preparar el entorno:
-1. Crear entorno virtual con venv
-2. Instalar las dependencias en el entorno: pip install -r requirements.txt
-
-Para ejecutar el sistema tan solo hace falta ejecutar el comando:
-> main.py <parámetros de entrada>
-
-y los parámetros son:
-```- rows = nº de rows del grid
-- columns = nº de columnas del grid
-- duration = duración en segundos (tiempos de mesa framework)
-- ratio_obstacles = float, ratio de obstaculos con respecto del total de casillas, ej: 0.15
-- ratio_vehicles = float, ratio de vehículos con respecto del total de casillas, ej 0.2
-- wait_before_remove = segundos que tarda en aparcar (eliminarse) un vehículo que no puede moverse más
-- seed = seed para la reproducción de la simulación, ej: 1111
-- display = 1 para mostrar gráficamente, 0 para no
+The parameters are:
+```- rows = number of rows in the grid
+- columns = number of columns in the grid
+- duration = duration in seconds (simulation time)
+- ratio_obstacles = float, ratio of obstacles with respect to the total number of cells, e.g., 0.15
+- ratio_vehicles = float, ratio of vehicles with respect to the total number of cells, e.g., 0.2
+- wait_before_remove = seconds it takes to remove a vehicle that cannot move anymore
+- seed = seed for simulation reproduction, e.g., 1111
+- display = 1 to show graphics, 0 to not show
 ```
 
 Ejemplo: `main.py 20 20 3600 0.15 0.2 10 1113 0`
