@@ -4,7 +4,7 @@ To set up the environment:
 2. Install the dependencies in the environment using `pip install -r requirements.txt`.
 
 To run the system, simply execute the following command:
-> main.py <input parameters>
+> main.py [input parameters]
 
 The parameters are:
 ```- rows = number of rows in the grid
@@ -17,59 +17,54 @@ The parameters are:
 - display = 1 to show graphics, 0 to not show
 ```
 
-Ejemplo: `main.py 20 20 3600 0.15 0.2 10 1113 0`
-<br />
-<br />
+`main.py 20 20 3600 0.15 0.2 10 1113 0`
 
-(20 rows, 20 columnas, 3600s de duración, 15% de obstáculos, 20% de vehículos, 10 s antes de aparcar, seed de 1113 y no mostrar gráficamente)
-o también se puede usar el fichero adjunto launch.json para ejecutar con vscode y depurar el código
+(20 rows, 20 columns, duration of 3600s, 15% obstacles, 20% vehicles, 10s before parking, seed of 1113, and no graphical display)
+Alternatively, you can use the attached launch.json file to run and debug the code with VSCode.
 
-Explicación de la simulación.
+Simulation Explanation:
 
-## 2. Inicialización
-- Se generan direcciones en las casillas de la siguiente forma: se genera una dirección inicial, y con un 70% se mantiene estable
-  hasta que el 30% restante genera un cambio ortogonal de dirección.
-- Al mismo tiempo, se generan obstaculos (casillas no transitables) con el rate indicado en los parámetros.
-- Después se intentan ajustar las direcciones de las casillas para evitar bucles muy evidentes, y que las casillas
-  de los bordes no apunten hacia fuera.
-- Se añaden semáforos en los cruces.
-- Se genera un punto de entrada para los vehículos
-- Se especifican todos los vehículos disponibles con el rate indicado en los parámetros.
+## 2. Initialization
+- Directions are generated in the cells as follows: an initial direction is generated, and with a 70% probability, it remains stable until the remaining 30% generates an orthogonal change in direction.
+- At the same time, obstacles (non-passable cells) are generated with the rate indicated in the parameters.
+- Then, the directions of the cells are adjusted to avoid obvious loops and ensure that the cells on the edges do not point outward.
+- Traffic lights are added at intersections.
+- An entry point for vehicles is generated.
+- All available vehicles are specified with the rate indicated in the parameters.
 
-## 3. Comportamiento
-Agente Townhall:
-- Es un agente que permite a los vehículos conocer el entorno, descubrir que hay en las casillas por las que circulan,
-  descubrir si hay otros vehículos o semáforos. Es como una especie de gps/agente omnisciente para guiar a los vehículos
+## 3. Behaviour
+Townhall Agent:
+
+- It is an agent that allows vehicles to know the environment, discover what is in the cells they move through, and determine if there are other vehicles or traffic lights. It functions as a kind of GPS/omniscient agent to guide the vehicles.
   
-  Es una forma de desacoplar los vehículos directamente del modelo.
+It is a way to decouple the vehicles directly from the model.
 
-Agentes vehículo:
-- Se mueven 1 casilla por tiempo/segundo. Siguen la dirección especificada por las casillas.
-- En detalle, se moverán por la casilla dictada por la casilla actual, o por las casillas laterales/ortogonales
-  si tienen definido el movimiento en esa dirección (como en una carretera normal con sus cruces izq y dcho.)
-- Si se encuentran bloqueados sin espacio durante X segundos, se considera que aparcan y se introduce un nuevo vehículo
-  al sistema.
-- Si se encuentran bloqueados pero con espacio libre que puedan tomar, realizan una "infracción" y se van por otro lado. 
-  Esto permite que las reglas estrictas de la simulación no dejen el sistema bloqueado fácilmente.
+Vehicle Agents:
 
-Agentes semáforo:
-- Se sitúan en los cruces, cada X segundos cambian la dirección en la que admiten la circulación.
-  Cada semáforo va a su propio ritmo (uno puede cambiar hacia donde está en verde cada 5 segundos mientras que otro puede hacerlo cada 8s). Admiten solo las direcciones que generaron el cruce para ponerse en verde.
+- They move 1 cell per time/second. They follow the direction specified by the cells.
+- In detail, they will move to the cell dictated by the current cell or to the lateral/orthogonal cells if movement in that direction is defined (as in a regular road with left and right turns).
+- If they are blocked without space for X seconds, it is considered that they are parking, and a new vehicle is introduced into the system.
+- If they are blocked but there is free space they can take, they commit an "infraction" and go another way. 
+  This allows the strict rules of the simulation to avoid easily blocking the system.
 
-## 4. Resultados
-Cuando la simulación acabe mostrará el tiempo consumido por cada vehículo esperando por otros vehículos y esperando por semáforos.
-También se mostrará la media y el total de tiempo acumulado.
-Aparte se mostrará cuales son las posiciones del sistema por las cuales los vehículo aparcaron al no poder desplazarse más.
+Traffic Light Agents:
 
-## 5. Representación gráfica
-- Agentes se muestran como bolitas de colores
-- Semáforos se muestran como flechas verdes que apuntarán cada vez a la dirección a la que permiten el acceso
-- Townhall no tiene representación
+- They are located at intersections and change the direction in which traffic is allowed every X seconds.
+Each traffic light operates at its own pace (one may change to green in its current direction every 5 seconds, while another may do so every 8 seconds). They only allow the directions that generated the intersection to turn green.
 
-- Agentes artificiales de representación: (he usado agentes porque usar javascript era bastante enrevesado solo para eso
-  y quería dedicar tiempo al proyecto como tal y no con javascript y pintar gráficos.)
-    - Casillas normales muestran una flecha con la dirección del tráfico
-    - Obstáculos o casillas no transitables muestran un cuadrado negro
-    - Punto de entrada es rojo
-## 6. Siguientes pasos:
-- Comunicación entre vehículos para optimizar rutas.
+## 4. Results
+When the simulation ends, it will display the time consumed by each vehicle waiting for other vehicles and waiting for traffic lights.
+It will also show the average and total accumulated time.
+Additionally, it will show the positions in the system where vehicles parked because they could not move further.
+
+## 5. Graphical Representation
+- Agents are represented as colored dots.
+- Traffic lights are represented as green arrows pointing in the direction of allowed access.
+- Townhall has no representation.
+- Artificial representation agents: (I used agents because using JavaScript was quite complicated just for that, and I wanted to dedicate time to the actual project instead of JavaScript and drawing graphics.)
+	- Normal cells show an arrow indicating the traffic direction.
+	- Obstacles or non-passable cells are represented as black squares.
+	- Entry point is red.
+
+## 6. Next steps
+- Communication between vehicles to optimize routes.
